@@ -10,7 +10,8 @@ from helpers import (
     package_project,
     get_target_population_data,
     load_social_data,
-    get_social_data
+    get_social_data,
+    organize_outputs_by_chart_type
 )
 
 from graphs import (
@@ -94,6 +95,7 @@ def main():
     print("\nGraphs created.")
 
     # Build Share folder and ZIP file
+    organize_outputs_by_chart_type()
     package_project()
 
     print("\nDone.")
