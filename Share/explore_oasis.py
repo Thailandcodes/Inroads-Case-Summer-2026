@@ -7,7 +7,8 @@ from helpers import (
     get_race_data,
     get_cause_data,
     save_csv,
-    package_project
+    package_project,
+    get_target_population_data
 )
 
 from graphs import (
@@ -19,7 +20,9 @@ from graphs import (
     graph_top_causes_by_source,
     graph_heatmaps_by_source_and_county,
     graph_pie_charts,
-    graph_dashboard_summary
+    graph_dashboard_summary,
+    graph_target_population_heatmaps,
+    graph_target_population_rankings
 )
 
 
@@ -45,6 +48,7 @@ def main():
     sex_data = get_sex_data(data)
     race_data = get_race_data(data)
     cause_data = get_cause_data(data)
+    target_data = get_target_population_data(data)
 
     # Save cleaned datasets as CSVs
     save_csv(total_data, "total_deaths")
@@ -52,6 +56,7 @@ def main():
     save_csv(sex_data, "sex_data")
     save_csv(race_data, "race_data")
     save_csv(cause_data, "cause_data")
+    save_csv(target_data, "target_population_data")
 
     print("\nCleaned datasets saved.")
 
@@ -65,6 +70,8 @@ def main():
     graph_heatmaps_by_source_and_county(cause_data)
     graph_pie_charts(sex_data, race_data, cause_data)
     graph_dashboard_summary(total_data, age_data, sex_data, cause_data)
+    graph_target_population_heatmaps(target_data)
+    graph_target_population_rankings(target_data)
 
     print("\nGraphs created.")
 

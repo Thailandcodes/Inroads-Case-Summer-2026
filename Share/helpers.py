@@ -186,6 +186,29 @@ def get_cause_data(data):
 
     return cause_data
 
+def get_target_population_data(data):
+    target_data = data[
+        (data["Cause"] != "Selected Causes Total") &
+        (data["Age"] != "Selected Ages Total") &
+        (data["Race"] != "Selected Races Total") &
+        (data["Sex"] != "Selected Sexes Total")
+    ].copy()
+
+    target_data = target_data[
+        ~target_data["Cause"].str.contains("Total", na=False)
+    ]
+
+    target_data["Group"] = (
+        target_data["Source"] + " - " + target_data["Geography"]
+    )
+
+    target_data["Percent"] = (
+        target_data["Deaths"] /
+        target_data.groupby(["Source", "Geography"])["Deaths"].transform("sum")
+    ) * 100
+
+    return target_data
+
 
 def save_csv(df, filename):
     df.to_csv(f"outputs/csv/{filename}.csv", index=False)
