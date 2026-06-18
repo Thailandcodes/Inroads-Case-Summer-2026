@@ -273,6 +273,84 @@ def get_social_data(data):
     return social
 
 
+def organize_outputs_by_chart_type():
+    """
+    Copies output files into folders by chart type.
+
+    This keeps the original outputs/png, outputs/html, and outputs/csv folders,
+    but also creates an easier-to-browse folder called outputs/by_chart_type.
+    """
+
+    chart_folders = {
+        "bar_charts": ["bar", "ranking", "rankings", "opportunities", "groups"],
+        "heatmaps": ["heatmap"],
+        "sunbursts": ["sunburst"],
+        "pie_charts": ["pie"],
+        "line_charts": ["line", "trend", "trends"],
+        "dashboards": ["dashboard"],
+        "csv_data": [".csv"]
+    }
+
+    base_folder = "outputs/by_chart_type"
+
+    # Remove old organized folder if it exists
+    if os.path.exists(base_folder):
+        shutil.rmtree(base_folder)
+
+    # Create chart type folders
+    for folder in chart_folders:
+        os.makedirs(os.path.join(base_folder, folder), exist_ok=True)
+
+    # Look through PNG, HTML, and CSV folders
+    folders_to_check = [
+        "outputs/png",
+        "outputs/html",
+        "outputs/csv"
+    ]
+
+    for folder in folders_to_check:
+        if not os.path.exists(folder):
+            continue
+
+        for file in os.listdir(folder):
+            old_path = os.path.join(folder, file)
+
+            if not os.path.isfile(old_path):
+                continue
+
+            file_lower = file.lower()
+
+            placed = False
+
+            for chart_type, keywords in chart_folders.items():
+                for keyword in keywords:
+                    if keyword in file_lower:
+                        new_path = os.path.join(
+                            base_folder,
+                            chart_type,
+                            file
+                        )
+
+                        shutil.copy(old_path, new_path)
+                        placed = True
+                        break
+
+                if placed:
+                    break
+
+            # If no keyword matched, put it in other
+            if not placed:
+                other_folder = os.path.join(base_folder, "other")
+                os.makedirs(other_folder, exist_ok=True)
+
+                shutil.copy(
+                    old_path,
+                    os.path.join(other_folder, file)
+                )
+
+    print("Outputs organized by chart type.")
+
+
 def save_csv(df, filename):
     df.to_csv(f"outputs/csv/{filename}.csv", index=False)
 

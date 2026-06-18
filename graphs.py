@@ -1181,54 +1181,54 @@ def graph_race_social_breakdowns(social_data):
 
 def keep_top_causes_per_group(df, group_cols, top_n=5):
     """
-    Keeps only the top causes of death inside each category group.
+    Keeps only the top N causes inside each group.
 
     Example:
     For each Source + County + SES + Race group,
-    keep only the top 5 causes.
+    keep only the top 5 causes by total deaths.
     """
 
-    ranked = (
-        df.groupby(group_cols + ["Cause"])["Deaths"]
+    cause_totals = (
+        df.groupby(group_cols + ["Cause"], as_index=False)["Deaths"]
         .sum()
-        .reset_index()
-        .sort_values(group_cols + ["Deaths"], ascending=[True] * len(group_cols) + [False])
     )
 
-    top_ranked = (
-        ranked.groupby(group_cols)
-        .head(top_n)
-        .reset_index(drop=True)
+    cause_totals["Rank"] = (
+        cause_totals
+        .groupby(group_cols)["Deaths"]
+        .rank(method="first", ascending=False)
     )
 
-    return top_ranked
+    top_causes = cause_totals[cause_totals["Rank"] <= top_n].copy()
+
+    return top_causes
 
 
 def graph_social_sunbursts(social_data):
     """
     Creates cleaner interactive drill-down charts.
 
-    These only keep the top 5 causes of death per category,
-    which makes the sunburst much easier to read.
+    Keeps the hierarchy:
+    Source -> County -> SES/Education -> Race -> Top 5 Causes
+
+    This keeps race visible within each SES or education category,
+    while limiting causes to the top 5 per group.
     """
 
     # ==================================================
     # Education + Race + Cause Sunburst
     # ==================================================
 
-    education_sunburst = social_data[
+    education_base = social_data[
         (social_data["Race"] != "Selected Races Total") &
         (social_data["Sex"] == "Selected Sexes Total") &
         (social_data["Education"] != "Selected Educations Total") &
-        (social_data["SES Vulnerability"] == "Selected SES Vulnerability Total")
+        (social_data["SES Vulnerability"] == "Selected SES Vulnerability Total") &
+        (social_data["Deaths"] > 0)
     ].copy()
 
-    education_sunburst = education_sunburst[
-        education_sunburst["Deaths"] > 0
-    ]
-
     education_sunburst = keep_top_causes_per_group(
-        education_sunburst,
+        education_base,
         ["Source", "Geography", "Education", "Race"],
         top_n=5
     )
@@ -1246,6 +1246,11 @@ def graph_social_sunbursts(social_data):
         title="Education, Race, and Cause of Death Drilldown - Top 5 Causes per Group"
     )
 
+    fig.update_traces(
+        maxdepth=5,
+        insidetextorientation="radial"
+    )
+
     fig.update_layout(
         width=1200,
         height=900
@@ -1259,19 +1264,16 @@ def graph_social_sunbursts(social_data):
     # SES Vulnerability + Race + Cause Sunburst
     # ==================================================
 
-    ses_sunburst = social_data[
+    ses_base = social_data[
         (social_data["Race"] != "Selected Races Total") &
         (social_data["Sex"] == "Selected Sexes Total") &
         (social_data["Education"] == "Selected Educations Total") &
-        (social_data["SES Vulnerability"] != "Selected SES Vulnerability Total")
+        (social_data["SES Vulnerability"] != "Selected SES Vulnerability Total") &
+        (social_data["Deaths"] > 0)
     ].copy()
 
-    ses_sunburst = ses_sunburst[
-        ses_sunburst["Deaths"] > 0
-    ]
-
     ses_sunburst = keep_top_causes_per_group(
-        ses_sunburst,
+        ses_base,
         ["Source", "Geography", "SES Vulnerability", "Race"],
         top_n=5
     )
@@ -1287,6 +1289,11 @@ def graph_social_sunbursts(social_data):
         ],
         values="Deaths",
         title="SES Vulnerability, Race, and Cause of Death Drilldown - Top 5 Causes per Group"
+    )
+
+    fig.update_traces(
+        maxdepth=5,
+        insidetextorientation="radial"
     )
 
     fig.update_layout(
