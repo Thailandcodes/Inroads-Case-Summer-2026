@@ -259,72 +259,78 @@ def graph_race_comparison(race_data):
 # ----------------------------------------------------
 
 def graph_common_causes(cause_data):
-    cause_sets = []
+    """
+    Creates source-specific top cause graphs.
+
+    This is safer than combining all sources into one graph because
+    different sources may name or group causes of death differently.
+    """
 
     for source in cause_data["Source"].unique():
-        source_causes = set(
-            cause_data[cause_data["Source"] == source]["Cause"]
+        source_data = cause_data[
+            cause_data["Source"] == source
+        ].copy()
+
+        top_causes = (
+            source_data.groupby("Cause")["Deaths"]
+            .sum()
+            .sort_values(ascending=False)
+            .head(10)
+            .index
         )
 
-        cause_sets.append(source_causes)
+        top_data = source_data[
+            source_data["Cause"].isin(top_causes)
+        ].copy()
 
-    common_causes = set.intersection(*cause_sets)
+        print_stats(
+            f"{source} Source-Specific Top Causes",
+            top_data,
+            "Percent"
+        )
 
-    print(f"\nMatching causes across all sources: {len(common_causes)}")
+        plt.figure(figsize=(14, 8))
 
-    if len(common_causes) < 5:
-        print("Not enough matching causes for a clean combined cause graph.")
-        return
+        sns.barplot(
+            data=top_data,
+            x="Percent",
+            y="Cause",
+            hue="Geography",
+            palette=COUNTY_COLORS
+        )
 
-    common_data = cause_data[cause_data["Cause"].isin(common_causes)].copy()
+        add_vertical_mean(top_data, "Percent")
 
-    top_causes = (
-        common_data.groupby("Cause")["Deaths"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .index
-    )
+        plt.title(
+            f"{source}: Top Causes of Death by County"
+        )
+        plt.xlabel("Percent of Deaths")
+        plt.ylabel("Cause of Death")
 
-    common_data = common_data[common_data["Cause"].isin(top_causes)]
+        save_png(
+            f"{source.lower()}_source_specific_top_causes"
+        )
 
-    print_stats("Common Causes", common_data, "Percent")
+        fig = px.bar(
+            top_data,
+            x="Percent",
+            y="Cause",
+            color="Geography",
+            barmode="group",
+            orientation="h",
+            color_discrete_map=COUNTY_COLORS,
+            title=f"{source}: Top Causes of Death by County"
+        )
 
-    plt.figure(figsize=(17, 8))
+        fig.add_vline(
+            x=top_data["Percent"].mean(),
+            line_dash="dash",
+            annotation_text=f"Mean: {top_data['Percent'].mean():.2f}%"
+        )
 
-    sns.lineplot(
-        data=common_data,
-        x="Cause",
-        y="Percent",
-        hue="Group",
-        marker="o"
-    )
-
-    add_horizontal_mean(common_data, "Percent")
-
-    plt.title("Common Causes Across Sources and Counties")
-    plt.ylabel("Percent of Deaths")
-    plt.xlabel("Cause of Death")
-    plt.xticks(rotation=45, ha="right")
-    save_png("common_causes_all_sources_counties")
-
-    fig = px.line(
-        common_data,
-        x="Cause",
-        y="Percent",
-        color="Group",
-        markers=True,
-        title="Common Causes Across Sources and Counties"
-    )
-
-    fig.add_hline(
-        y=common_data["Percent"].mean(),
-        line_dash="dash",
-        annotation_text=f"Mean: {common_data['Percent'].mean():.2f}%"
-    )
-
-    fig.write_html("outputs/html/interactive_common_causes_all_sources_counties.html")
-
+        fig.write_html(
+            f"outputs/html/interactive_{source.lower()}_source_specific_top_causes.html"
+        )
 
 # ----------------------------------------------------
 # 6. Top causes by source
