@@ -878,3 +878,367 @@ def update_pie_labels(fig):
         textinfo="percent+label+value"
     )
     return fig
+
+def graph_social_determinants(social_data):
+    """
+    Analyzes deaths by education, SES vulnerability, race, and cause.
+    """
+
+    for source in social_data["Source"].unique():
+        for county in social_data["Geography"].unique():
+
+            current = social_data[
+                (social_data["Source"] == source) &
+                (social_data["Geography"] == county)
+            ].copy()
+
+            # Pick top causes for this source/county
+            top_causes = (
+                current[
+                    (current["Race"] == "Selected Races Total") &
+                    (current["Sex"] == "Selected Sexes Total") &
+                    (current["Education"] == "Selected Educations Total") &
+                    (current["SES Vulnerability"] == "Selected SES Vulnerability Total")
+                ]
+                .groupby("Cause")["Deaths"]
+                .sum()
+                .sort_values(ascending=False)
+                .head(8)
+                .index
+            )
+
+            current = current[current["Cause"].isin(top_causes)].copy()
+            current["Short Cause"] = current["Cause"].apply(shorten_names)
+
+            # ==================================================
+            # Education x Cause Heatmap
+            # ==================================================
+
+            education_data = current[
+                (current["Race"] == "Selected Races Total") &
+                (current["Sex"] == "Selected Sexes Total") &
+                (current["Education"] != "Selected Educations Total") &
+                (current["SES Vulnerability"] == "Selected SES Vulnerability Total")
+            ].copy()
+
+            education_heat = education_data.pivot_table(
+                index="Education",
+                columns="Short Cause",
+                values="Deaths",
+                aggfunc="sum",
+                fill_value=0
+            )
+
+            education_heat = education_heat.loc[
+                education_heat.sum(axis=1) > 0
+            ]
+
+            plt.figure(figsize=(17, 7))
+
+            sns.heatmap(
+                education_heat,
+                annot=True,
+                fmt=".0f",
+                cmap="Purples",
+                linewidths=0.5,
+                annot_kws={"size": 9}
+            )
+
+            plt.title(f"{source} - {county}: Education Level by Cause of Death")
+            plt.xlabel("Cause of Death")
+            plt.ylabel("Education Level")
+            plt.xticks(rotation=35, ha="right")
+
+            save_png(
+                f"{source.lower()}_{county.lower()}_education_by_cause_heatmap"
+            )
+
+            fig = px.imshow(
+                education_heat,
+                text_auto=True,
+                title=f"{source} - {county}: Education Level by Cause of Death",
+                labels=dict(
+                    x="Cause of Death",
+                    y="Education Level",
+                    color="Deaths"
+                )
+            )
+
+            fig.update_layout(width=1200, height=650, xaxis_tickangle=-35)
+
+            fig.write_html(
+                f"outputs/html/interactive_{source.lower()}_{county.lower()}_education_by_cause_heatmap.html"
+            )
+
+            # ==================================================
+            # SES Vulnerability x Cause Heatmap
+            # ==================================================
+
+            ses_data = current[
+                (current["Race"] == "Selected Races Total") &
+                (current["Sex"] == "Selected Sexes Total") &
+                (current["Education"] == "Selected Educations Total") &
+                (current["SES Vulnerability"] != "Selected SES Vulnerability Total")
+            ].copy()
+
+            ses_heat = ses_data.pivot_table(
+                index="SES Vulnerability",
+                columns="Short Cause",
+                values="Deaths",
+                aggfunc="sum",
+                fill_value=0
+            )
+
+            ses_order = ["Very Low", "Low", "Average", "High", "Very High"]
+
+            ses_heat = ses_heat.reindex(
+                [x for x in ses_order if x in ses_heat.index]
+            )
+
+            plt.figure(figsize=(17, 7))
+
+            sns.heatmap(
+                ses_heat,
+                annot=True,
+                fmt=".0f",
+                cmap="Oranges",
+                linewidths=0.5,
+                annot_kws={"size": 9}
+            )
+
+            plt.title(f"{source} - {county}: SES Vulnerability by Cause of Death")
+            plt.xlabel("Cause of Death")
+            plt.ylabel("SES Vulnerability")
+            plt.xticks(rotation=35, ha="right")
+
+            save_png(
+                f"{source.lower()}_{county.lower()}_ses_by_cause_heatmap"
+            )
+
+            fig = px.imshow(
+                ses_heat,
+                text_auto=True,
+                title=f"{source} - {county}: SES Vulnerability by Cause of Death",
+                labels=dict(
+                    x="Cause of Death",
+                    y="SES Vulnerability",
+                    color="Deaths"
+                )
+            )
+
+            fig.update_layout(width=1200, height=650, xaxis_tickangle=-35)
+
+            fig.write_html(
+                f"outputs/html/interactive_{source.lower()}_{county.lower()}_ses_by_cause_heatmap.html"
+            )
+
+
+def graph_race_social_breakdowns(social_data):
+    """
+    Shows how race fits into education/cause and SES/cause patterns.
+    """
+
+    # ==================================================
+    # Race + Education + Cause leaderboard
+    # ==================================================
+
+    race_education = social_data[
+        (social_data["Race"] != "Selected Races Total") &
+        (social_data["Sex"] == "Selected Sexes Total") &
+        (social_data["Education"] != "Selected Educations Total") &
+        (social_data["SES Vulnerability"] == "Selected SES Vulnerability Total")
+    ].copy()
+
+    race_education = (
+        race_education
+        .groupby(["Source", "Geography", "Race", "Education", "Cause"])["Deaths"]
+        .sum()
+        .reset_index()
+        .sort_values("Deaths", ascending=False)
+    )
+
+    race_education.to_csv(
+        "outputs/csv/race_education_cause_rankings.csv",
+        index=False
+    )
+
+    top_education = race_education.head(25).copy()
+
+    top_education["Short Cause"] = top_education["Cause"].apply(shorten_names)
+
+    top_education["Label"] = (
+        top_education["Geography"] + " | " +
+        top_education["Race"] + " | " +
+        top_education["Education"] + " | " +
+        top_education["Short Cause"]
+    )
+
+    plt.figure(figsize=(16, 11))
+
+    ax = sns.barplot(
+        data=top_education,
+        x="Deaths",
+        y="Label",
+        hue="Source"
+    )
+
+    add_bar_labels(ax, percent=False)
+
+    plt.title("Top Race + Education + Cause Mortality Groups")
+    plt.xlabel("Deaths")
+    plt.ylabel("Group")
+
+    save_png("top_race_education_cause_groups")
+
+    fig = px.bar(
+        top_education,
+        x="Deaths",
+        y="Label",
+        color="Source",
+        orientation="h",
+        text="Deaths",
+        title="Top Race + Education + Cause Mortality Groups",
+        hover_data=["Geography", "Race", "Education", "Cause"]
+    )
+
+    fig.update_traces(textposition="outside")
+    fig.update_layout(width=1300, height=950, yaxis=dict(autorange="reversed"))
+
+    fig.write_html(
+        "outputs/html/interactive_top_race_education_cause_groups.html"
+    )
+
+    # ==================================================
+    # Race + SES + Cause leaderboard
+    # ==================================================
+
+    race_ses = social_data[
+        (social_data["Race"] != "Selected Races Total") &
+        (social_data["Sex"] == "Selected Sexes Total") &
+        (social_data["Education"] == "Selected Educations Total") &
+        (social_data["SES Vulnerability"] != "Selected SES Vulnerability Total")
+    ].copy()
+
+    race_ses = (
+        race_ses
+        .groupby(["Source", "Geography", "Race", "SES Vulnerability", "Cause"])["Deaths"]
+        .sum()
+        .reset_index()
+        .sort_values("Deaths", ascending=False)
+    )
+
+    race_ses.to_csv(
+        "outputs/csv/race_ses_cause_rankings.csv",
+        index=False
+    )
+
+    top_ses = race_ses.head(25).copy()
+
+    top_ses["Short Cause"] = top_ses["Cause"].apply(shorten_names)
+
+    top_ses["Label"] = (
+        top_ses["Geography"] + " | " +
+        top_ses["Race"] + " | " +
+        top_ses["SES Vulnerability"] + " SES | " +
+        top_ses["Short Cause"]
+    )
+
+    plt.figure(figsize=(16, 11))
+
+    ax = sns.barplot(
+        data=top_ses,
+        x="Deaths",
+        y="Label",
+        hue="Source"
+    )
+
+    add_bar_labels(ax, percent=False)
+
+    plt.title("Top Race + SES Vulnerability + Cause Mortality Groups")
+    plt.xlabel("Deaths")
+    plt.ylabel("Group")
+
+    save_png("top_race_ses_cause_groups")
+
+    fig = px.bar(
+        top_ses,
+        x="Deaths",
+        y="Label",
+        color="Source",
+        orientation="h",
+        text="Deaths",
+        title="Top Race + SES Vulnerability + Cause Mortality Groups",
+        hover_data=["Geography", "Race", "SES Vulnerability", "Cause"]
+    )
+
+    fig.update_traces(textposition="outside")
+    fig.update_layout(width=1300, height=950, yaxis=dict(autorange="reversed"))
+
+    fig.write_html(
+        "outputs/html/interactive_top_race_ses_cause_groups.html"
+    )
+
+
+def graph_social_sunbursts(social_data):
+    """
+    Creates interactive drill-down charts.
+    These are HTML-only because sunbursts are meant to be interactive.
+    """
+
+    education_sunburst = social_data[
+        (social_data["Race"] != "Selected Races Total") &
+        (social_data["Sex"] == "Selected Sexes Total") &
+        (social_data["Education"] != "Selected Educations Total") &
+        (social_data["SES Vulnerability"] == "Selected SES Vulnerability Total")
+    ].copy()
+
+    education_sunburst = (
+        education_sunburst
+        .groupby(["Source", "Geography", "Education", "Race", "Cause"])["Deaths"]
+        .sum()
+        .reset_index()
+    )
+
+    education_sunburst = education_sunburst[
+        education_sunburst["Deaths"] > 0
+    ]
+
+    fig = px.sunburst(
+        education_sunburst,
+        path=["Source", "Geography", "Education", "Race", "Cause"],
+        values="Deaths",
+        title="Education, Race, and Cause of Death Drilldown"
+    )
+
+    fig.write_html(
+        "outputs/html/interactive_education_race_cause_sunburst.html"
+    )
+
+    ses_sunburst = social_data[
+        (social_data["Race"] != "Selected Races Total") &
+        (social_data["Sex"] == "Selected Sexes Total") &
+        (social_data["Education"] == "Selected Educations Total") &
+        (social_data["SES Vulnerability"] != "Selected SES Vulnerability Total")
+    ].copy()
+
+    ses_sunburst = (
+        ses_sunburst
+        .groupby(["Source", "Geography", "SES Vulnerability", "Race", "Cause"])["Deaths"]
+        .sum()
+        .reset_index()
+    )
+
+    ses_sunburst = ses_sunburst[
+        ses_sunburst["Deaths"] > 0
+    ]
+
+    fig = px.sunburst(
+        ses_sunburst,
+        path=["Source", "Geography", "SES Vulnerability", "Race", "Cause"],
+        values="Deaths",
+        title="SES Vulnerability, Race, and Cause of Death Drilldown"
+    )
+
+    fig.write_html(
+        "outputs/html/interactive_ses_race_cause_sunburst.html"
+    )

@@ -210,6 +210,69 @@ def get_target_population_data(data):
     return target_data
 
 
+SOCIAL_SOURCES = {
+    "Georgia": "data/Georgia 2024.xlsx",
+    "OASIS": "data/Oasis 2024.xlsx",
+    "NCHS": "data/NCHS 2024.xlsx"
+}
+
+
+def load_social_data():
+    all_data = []
+
+    for source_name, file_path in SOCIAL_SOURCES.items():
+        raw = pd.read_excel(file_path, sheet_name="Data", header=None)
+
+        # Find the real header row
+        header_row = raw[
+            raw.apply(
+                lambda row: row.astype(str).str.contains("Geography").any(),
+                axis=1
+            )
+        ].index[0]
+
+        df = pd.read_excel(
+            file_path,
+            sheet_name="Data",
+            skiprows=header_row
+        )
+
+        df = df.rename(columns={2024: "Deaths", "2024": "Deaths"})
+
+        df = df[df["Deaths"] != "Deaths"]
+
+        for col in [
+            "Geography",
+            "Race",
+            "Cause",
+            "Sex",
+            "Education",
+            "SES Vulnerability"
+        ]:
+            df[col] = df[col].astype(str).str.strip()
+
+        df["Deaths"] = pd.to_numeric(df["Deaths"], errors="coerce")
+        df["Source"] = source_name
+
+        df = df[df["Geography"].isin(["Fulton", "DeKalb"])]
+        df = df.dropna(subset=["Deaths"])
+
+        all_data.append(df)
+
+    return pd.concat(all_data, ignore_index=True)
+
+
+def get_social_data(data):
+    social = data[
+        (data["Cause"] != "Selected Causes Total") &
+        ~data["Cause"].str.contains("Total", na=False)
+    ].copy()
+
+    social["Group"] = social["Source"] + " - " + social["Geography"]
+
+    return social
+
+
 def save_csv(df, filename):
     df.to_csv(f"outputs/csv/{filename}.csv", index=False)
 

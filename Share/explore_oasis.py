@@ -8,7 +8,9 @@ from helpers import (
     get_cause_data,
     save_csv,
     package_project,
-    get_target_population_data
+    get_target_population_data,
+    load_social_data,
+    get_social_data
 )
 
 from graphs import (
@@ -22,7 +24,10 @@ from graphs import (
     graph_pie_charts,
     graph_dashboard_summary,
     graph_target_population_heatmaps,
-    graph_target_population_rankings
+    graph_target_population_rankings,
+    graph_social_determinants,
+    graph_race_social_breakdowns,
+    graph_social_sunbursts
 )
 
 
@@ -62,16 +67,29 @@ def main():
 
     # Create graphs
     graph_total_deaths(total_data)
-    graph_age_trends(age_data)
+    #graph_age_trends(age_data)
     graph_sex_comparison(sex_data)
     graph_race_comparison(race_data)
-    graph_common_causes(cause_data)
+    #graph_common_causes(cause_data)
     graph_top_causes_by_source(cause_data)
     graph_heatmaps_by_source_and_county(cause_data)
     graph_pie_charts(sex_data, race_data, cause_data)
-    graph_dashboard_summary(total_data, age_data, sex_data, cause_data)
-    graph_target_population_heatmaps(target_data)
-    graph_target_population_rankings(target_data)
+    #graph_dashboard_summary(total_data, age_data, sex_data, cause_data)
+    #graph_target_population_heatmaps(target_data)
+    #graph_target_population_rankings(target_data)
+
+    print("\nStarting social determinants analysis...")
+
+    social_raw = load_social_data()
+    social_data = get_social_data(social_raw)
+
+    save_csv(social_data, "social_determinants_data")
+
+    graph_social_determinants(social_data)
+    graph_race_social_breakdowns(social_data)
+    graph_social_sunbursts(social_data)
+
+    print("\nSocial determinants analysis complete.")
 
     print("\nGraphs created.")
 
