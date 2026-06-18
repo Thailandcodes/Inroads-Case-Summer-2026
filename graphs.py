@@ -592,10 +592,20 @@ def add_bar_labels(ax, percent=True):
             ax.bar_label(container, fmt="%.0f", fontsize=8)
 
 
+def shorten_names(text, max_length=28):
+    text = str(text)
+
+    if len(text) > max_length:
+        return text[:max_length] + "..."
+
+    return text
+
 def graph_target_population_heatmaps(target_data):
     """
-    Shows which age, race, and sex groups are dying from which causes.
-    These graphs help identify who should be served.
+    Makes readable target population graphs.
+
+    Age x Cause and Race x Cause stay as heatmaps.
+    Sex x Cause becomes a bar chart because there are only two sex categories.
     """
 
     for source in target_data["Source"].unique():
@@ -614,93 +624,177 @@ def graph_target_population_heatmaps(target_data):
                 .index
             )
 
-            current = current[current["Cause"].isin(top_causes)]
+            current = current[current["Cause"].isin(top_causes)].copy()
 
-            # Age x Cause heatmap
+            current["Short Cause"] = current["Cause"].apply(shorten_names)
+
+            # -------------------------------
+            # Age x Cause Heatmap
+            # -------------------------------
+
             age_heat = current.pivot_table(
                 index="Age",
-                columns="Cause",
+                columns="Short Cause",
                 values="Deaths",
                 aggfunc="sum",
                 fill_value=0
             )
 
-            plt.figure(figsize=(14, 8))
-            sns.heatmap(age_heat, annot=True, fmt=".0f", cmap="Reds")
+            # Remove empty rows
+            age_heat = age_heat.loc[age_heat.sum(axis=1) > 0]
+
+            plt.figure(figsize=(18, 10))
+
+            sns.heatmap(
+                age_heat,
+                annot=True,
+                fmt=".0f",
+                cmap="Reds",
+                linewidths=0.5,
+                annot_kws={"size": 8}
+            )
+
             plt.title(f"{source} - {county}: Age by Cause of Death")
-            plt.xlabel("Cause")
-            plt.ylabel("Age")
-            save_png(f"{source.lower()}_{county.lower()}_age_by_cause_heatmap")
+            plt.xlabel("Cause of Death")
+            plt.ylabel("Age Group")
+            plt.xticks(rotation=35, ha="right", fontsize=9)
+            plt.yticks(rotation=0, fontsize=9)
+
+            save_png(
+                f"{source.lower()}_{county.lower()}_age_by_cause_heatmap"
+            )
 
             fig = px.imshow(
                 age_heat,
                 text_auto=True,
                 title=f"{source} - {county}: Age by Cause of Death",
-                labels=dict(x="Cause", y="Age", color="Deaths")
+                labels=dict(
+                    x="Cause of Death",
+                    y="Age Group",
+                    color="Deaths"
+                )
+            )
+
+            fig.update_layout(
+                width=1200,
+                height=800,
+                xaxis_tickangle=-35
             )
 
             fig.write_html(
                 f"outputs/html/interactive_{source.lower()}_{county.lower()}_age_by_cause_heatmap.html"
             )
 
-            # Race x Cause heatmap
+            # -------------------------------
+            # Race x Cause Heatmap
+            # -------------------------------
+
             race_heat = current.pivot_table(
                 index="Race",
-                columns="Cause",
+                columns="Short Cause",
                 values="Deaths",
                 aggfunc="sum",
                 fill_value=0
             )
 
-            plt.figure(figsize=(14, 7))
-            sns.heatmap(race_heat, annot=True, fmt=".0f", cmap="Blues")
+            race_heat = race_heat.loc[race_heat.sum(axis=1) > 0]
+
+            plt.figure(figsize=(16, 7))
+
+            sns.heatmap(
+                race_heat,
+                annot=True,
+                fmt=".0f",
+                cmap="Blues",
+                linewidths=0.5,
+                annot_kws={"size": 9}
+            )
+
             plt.title(f"{source} - {county}: Race by Cause of Death")
-            plt.xlabel("Cause")
+            plt.xlabel("Cause of Death")
             plt.ylabel("Race")
-            save_png(f"{source.lower()}_{county.lower()}_race_by_cause_heatmap")
+            plt.xticks(rotation=35, ha="right", fontsize=9)
+            plt.yticks(rotation=0, fontsize=9)
+
+            save_png(
+                f"{source.lower()}_{county.lower()}_race_by_cause_heatmap"
+            )
 
             fig = px.imshow(
                 race_heat,
                 text_auto=True,
                 title=f"{source} - {county}: Race by Cause of Death",
-                labels=dict(x="Cause", y="Race", color="Deaths")
+                labels=dict(
+                    x="Cause of Death",
+                    y="Race",
+                    color="Deaths"
+                )
+            )
+
+            fig.update_layout(
+                width=1200,
+                height=650,
+                xaxis_tickangle=-35
             )
 
             fig.write_html(
                 f"outputs/html/interactive_{source.lower()}_{county.lower()}_race_by_cause_heatmap.html"
             )
 
-            # Sex x Cause heatmap
-            sex_heat = current.pivot_table(
-                index="Sex",
-                columns="Cause",
-                values="Deaths",
-                aggfunc="sum",
-                fill_value=0
+            # -------------------------------
+            # Sex x Cause Bar Chart
+            # -------------------------------
+
+            sex_data = (
+                current.groupby(["Sex", "Short Cause"])["Deaths"]
+                .sum()
+                .reset_index()
             )
 
-            plt.figure(figsize=(14, 4))
-            sns.heatmap(sex_heat, annot=True, fmt=".0f", cmap="Greens")
-            plt.title(f"{source} - {county}: Sex by Cause of Death")
-            plt.xlabel("Cause")
-            plt.ylabel("Sex")
-            save_png(f"{source.lower()}_{county.lower()}_sex_by_cause_heatmap")
+            plt.figure(figsize=(15, 7))
 
-            fig = px.imshow(
-                sex_heat,
-                text_auto=True,
-                title=f"{source} - {county}: Sex by Cause of Death",
-                labels=dict(x="Cause", y="Sex", color="Deaths")
+            ax = sns.barplot(
+                data=sex_data,
+                x="Deaths",
+                y="Short Cause",
+                hue="Sex"
+            )
+
+            add_bar_labels(ax, percent=False)
+
+            plt.title(f"{source} - {county}: Sex by Cause of Death")
+            plt.xlabel("Deaths")
+            plt.ylabel("Cause of Death")
+
+            save_png(
+                f"{source.lower()}_{county.lower()}_sex_by_cause_bar"
+            )
+
+            fig = px.bar(
+                sex_data,
+                x="Deaths",
+                y="Short Cause",
+                color="Sex",
+                barmode="group",
+                orientation="h",
+                text="Deaths",
+                title=f"{source} - {county}: Sex by Cause of Death"
+            )
+
+            fig.update_traces(textposition="outside")
+
+            fig.update_layout(
+                width=1100,
+                height=700
             )
 
             fig.write_html(
-                f"outputs/html/interactive_{source.lower()}_{county.lower()}_sex_by_cause_heatmap.html"
+                f"outputs/html/interactive_{source.lower()}_{county.lower()}_sex_by_cause_bar.html"
             )
-
 
 def graph_target_population_rankings(target_data):
     """
-    Ranks the highest-risk population groups by cause, age, race, sex, and county.
+    Creates a readable leaderboard of the highest-risk target population groups.
     """
 
     rankings = (
@@ -719,20 +813,22 @@ def graph_target_population_rankings(target_data):
         index=False
     )
 
-    top_25 = rankings.head(25)
+    top_20 = rankings.head(20).copy()
 
-    top_25["Label"] = (
-        top_25["Geography"] + " | " +
-        top_25["Age"] + " | " +
-        top_25["Race"] + " | " +
-        top_25["Sex"] + " | " +
-        top_25["Cause"]
+    top_20["Short Cause"] = top_20["Cause"].apply(shorten_names)
+
+    top_20["Label"] = (
+        top_20["Geography"] + " | " +
+        top_20["Age"] + " | " +
+        top_20["Race"] + " | " +
+        top_20["Sex"] + " | " +
+        top_20["Short Cause"]
     )
 
-    plt.figure(figsize=(14, 10))
+    plt.figure(figsize=(16, 11))
 
     ax = sns.barplot(
-        data=top_25,
+        data=top_20,
         x="Deaths",
         y="Label",
         hue="Source"
@@ -740,32 +836,41 @@ def graph_target_population_rankings(target_data):
 
     add_bar_labels(ax, percent=False)
 
-    plt.title("Top Target Population Opportunities")
+    plt.title("Top 20 Target Population Opportunities")
     plt.xlabel("Deaths")
     plt.ylabel("Population Group")
-    plt.tight_layout()
-    plt.savefig("outputs/png/top_target_population_opportunities.png", dpi=300)
-    plt.savefig("outputs/png/top_target_population_opportunities.svg")
-    plt.show()
-    plt.close()
+
+    save_png("top_target_population_opportunities")
 
     fig = px.bar(
-        top_25,
+        top_20,
         x="Deaths",
         y="Label",
         color="Source",
         orientation="h",
         text="Deaths",
-        title="Top Target Population Opportunities",
-        hover_data=["Geography", "Cause", "Age", "Race", "Sex"]
+        title="Top 20 Target Population Opportunities",
+        hover_data=[
+            "Geography",
+            "Cause",
+            "Age",
+            "Race",
+            "Sex",
+            "Priority Score"
+        ]
     )
 
     fig.update_traces(textposition="outside")
 
+    fig.update_layout(
+        width=1300,
+        height=900,
+        yaxis=dict(autorange="reversed")
+    )
+
     fig.write_html(
         "outputs/html/interactive_top_target_population_opportunities.html"
     )
-
 
 def update_pie_labels(fig):
     fig.update_traces(
