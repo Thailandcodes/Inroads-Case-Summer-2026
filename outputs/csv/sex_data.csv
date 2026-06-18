@@ -1,0 +1,13 @@
+Geography,FIPS,Race,Cause,Age,Sex,Deaths,Source,Percent,Group
+DeKalb,13089,Selected Races Total,Selected Causes Total,Selected Ages Total,Male,2296.0,Georgia,52.781609195402304,Georgia - DeKalb
+DeKalb,13089,Selected Races Total,Selected Causes Total,Selected Ages Total,Female,2054.0,Georgia,47.218390804597696,Georgia - DeKalb
+Fulton,13121,Selected Races Total,Selected Causes Total,Selected Ages Total,Male,2951.0,Georgia,52.03667783459708,Georgia - Fulton
+Fulton,13121,Selected Races Total,Selected Causes Total,Selected Ages Total,Female,2720.0,Georgia,47.96332216540293,Georgia - Fulton
+DeKalb,13089,Selected Races Total,Selected Causes Total,Selected Ages Total,Male,2252.0,OASIS,52.70301895623683,OASIS - DeKalb
+DeKalb,13089,Selected Races Total,Selected Causes Total,Selected Ages Total,Female,2021.0,OASIS,47.29698104376317,OASIS - DeKalb
+Fulton,13121,Selected Races Total,Selected Causes Total,Selected Ages Total,Male,2900.0,OASIS,52.34657039711191,OASIS - Fulton
+Fulton,13121,Selected Races Total,Selected Causes Total,Selected Ages Total,Female,2640.0,OASIS,47.65342960288809,OASIS - Fulton
+DeKalb,13089,Selected Races Total,Selected Causes Total,Selected Ages Total,Male,2352.0,NCHS,53.3938706015891,NCHS - DeKalb
+DeKalb,13089,Selected Races Total,Selected Causes Total,Selected Ages Total,Female,2053.0,NCHS,46.60612939841089,NCHS - DeKalb
+Fulton,13121,Selected Races Total,Selected Causes Total,Selected Ages Total,Male,3051.0,NCHS,53.348487497814304,NCHS - Fulton
+Fulton,13121,Selected Races Total,Selected Causes Total,Selected Ages Total,Female,2668.0,NCHS,46.651512502185696,NCHS - Fulton
