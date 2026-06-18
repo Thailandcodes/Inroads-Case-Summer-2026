@@ -3,7 +3,7 @@ import shutil
 import pandas as pd
 
 
-# These are the three Excel files we are using
+# These are the three Excel files we are using for the main mortality analysis
 SOURCES = {
     "Georgia": "data/Georgia Rankable Causes Fulton and Dekalb 2024.xlsx",
     "OASIS": "data/Oasis Rankable Causes Fulton and Dekalb 2024.xlsx",
@@ -11,29 +11,12 @@ SOURCES = {
 }
 
 
-# Ordered age groups so line graphs do not appear random
-AGE_ORDER = [
-    "<1 year",
-    "1-4 years",
-    "5-9 years",
-    "10-14 years",
-    "15-17 years",
-    "18-19 years",
-    "20-24 years",
-    "25-29 years",
-    "30-34 years",
-    "35-39 years",
-    "40-44 years",
-    "45-49 years",
-    "50-54 years",
-    "55-59 years",
-    "60-64 years",
-    "65-69 years",
-    "70-74 years",
-    "75-79 years",
-    "80-84 years",
-    "85+ years"
-]
+# These are the three Excel files we are using for education and SES analysis
+SOCIAL_SOURCES = {
+    "Georgia": "data/Georgia 2024.xlsx",
+    "OASIS": "data/Oasis 2024.xlsx",
+    "NCHS": "data/NCHS 2024.xlsx"
+}
 
 
 def setup_folders():
@@ -41,7 +24,6 @@ def setup_folders():
     os.makedirs("outputs/png", exist_ok=True)
     os.makedirs("outputs/html", exist_ok=True)
     os.makedirs("outputs/csv", exist_ok=True)
-    os.makedirs("Share", exist_ok=True)
 
 
 def load_all_data():
@@ -81,45 +63,6 @@ def load_all_data():
     data = data.dropna(subset=["Deaths"])
 
     return data
-
-
-def get_total_data(data):
-    total_data = data[
-        (data["Race"] == "Selected Races Total") &
-        (data["Sex"] == "Selected Sexes Total") &
-        (data["Age"] == "Selected Ages Total") &
-        (data["Cause"] == "Selected Causes Total")
-    ].copy()
-
-    return total_data
-
-
-def get_age_data(data):
-    age_data = data[
-        (data["Race"] == "Selected Races Total") &
-        (data["Sex"] == "Selected Sexes Total") &
-        (data["Cause"] == "Selected Causes Total") &
-        (data["Age"] != "Selected Ages Total")
-    ].copy()
-
-    age_data["Percent"] = (
-        age_data["Deaths"] /
-        age_data.groupby(["Source", "Geography"])["Deaths"].transform("sum")
-    ) * 100
-
-    age_data["Age"] = pd.Categorical(
-        age_data["Age"],
-        categories=AGE_ORDER,
-        ordered=True
-    )
-
-    age_data = age_data.sort_values("Age")
-
-    age_data["Group"] = (
-        age_data["Source"] + " - " + age_data["Geography"]
-    )
-
-    return age_data
 
 
 def get_sex_data(data):
@@ -186,36 +129,6 @@ def get_cause_data(data):
 
     return cause_data
 
-def get_target_population_data(data):
-    target_data = data[
-        (data["Cause"] != "Selected Causes Total") &
-        (data["Age"] != "Selected Ages Total") &
-        (data["Race"] != "Selected Races Total") &
-        (data["Sex"] != "Selected Sexes Total")
-    ].copy()
-
-    target_data = target_data[
-        ~target_data["Cause"].str.contains("Total", na=False)
-    ]
-
-    target_data["Group"] = (
-        target_data["Source"] + " - " + target_data["Geography"]
-    )
-
-    target_data["Percent"] = (
-        target_data["Deaths"] /
-        target_data.groupby(["Source", "Geography"])["Deaths"].transform("sum")
-    ) * 100
-
-    return target_data
-
-
-SOCIAL_SOURCES = {
-    "Georgia": "data/Georgia 2024.xlsx",
-    "OASIS": "data/Oasis 2024.xlsx",
-    "NCHS": "data/NCHS 2024.xlsx"
-}
-
 
 def load_social_data():
     all_data = []
@@ -239,8 +152,10 @@ def load_social_data():
 
         df = df.rename(columns={2024: "Deaths", "2024": "Deaths"})
 
+        # Remove repeated header rows
         df = df[df["Deaths"] != "Deaths"]
 
+        # Clean text columns
         for col in [
             "Geography",
             "Race",
@@ -273,84 +188,6 @@ def get_social_data(data):
     return social
 
 
-def organize_outputs_by_chart_type():
-    """
-    Copies output files into folders by chart type.
-
-    This keeps the original outputs/png, outputs/html, and outputs/csv folders,
-    but also creates an easier-to-browse folder called outputs/by_chart_type.
-    """
-
-    chart_folders = {
-        "bar_charts": ["bar", "ranking", "rankings", "opportunities", "groups"],
-        "heatmaps": ["heatmap"],
-        "sunbursts": ["sunburst"],
-        "pie_charts": ["pie"],
-        "line_charts": ["line", "trend", "trends"],
-        "dashboards": ["dashboard"],
-        "csv_data": [".csv"]
-    }
-
-    base_folder = "outputs/by_chart_type"
-
-    # Remove old organized folder if it exists
-    if os.path.exists(base_folder):
-        shutil.rmtree(base_folder)
-
-    # Create chart type folders
-    for folder in chart_folders:
-        os.makedirs(os.path.join(base_folder, folder), exist_ok=True)
-
-    # Look through PNG, HTML, and CSV folders
-    folders_to_check = [
-        "outputs/png",
-        "outputs/html",
-        "outputs/csv"
-    ]
-
-    for folder in folders_to_check:
-        if not os.path.exists(folder):
-            continue
-
-        for file in os.listdir(folder):
-            old_path = os.path.join(folder, file)
-
-            if not os.path.isfile(old_path):
-                continue
-
-            file_lower = file.lower()
-
-            placed = False
-
-            for chart_type, keywords in chart_folders.items():
-                for keyword in keywords:
-                    if keyword in file_lower:
-                        new_path = os.path.join(
-                            base_folder,
-                            chart_type,
-                            file
-                        )
-
-                        shutil.copy(old_path, new_path)
-                        placed = True
-                        break
-
-                if placed:
-                    break
-
-            # If no keyword matched, put it in other
-            if not placed:
-                other_folder = os.path.join(base_folder, "other")
-                os.makedirs(other_folder, exist_ok=True)
-
-                shutil.copy(
-                    old_path,
-                    os.path.join(other_folder, file)
-                )
-
-    print("Outputs organized by chart type.")
-
-
 def save_csv(df, filename):
     df.to_csv(f"outputs/csv/{filename}.csv", index=False)
 
@@ -361,9 +198,22 @@ def package_project():
         shutil.rmtree("Share")
 
     os.makedirs("Share", exist_ok=True)
+    os.makedirs("Share/outputs", exist_ok=True)
+    os.makedirs("Share/data", exist_ok=True)
 
-    # Copy outputs into Share
-    shutil.copytree("outputs", "Share/outputs")
+    # Only copy useful output folders
+    output_folders = [
+        "outputs/png",
+        "outputs/html",
+        "outputs/csv"
+    ]
+
+    for folder in output_folders:
+        if os.path.exists(folder):
+            shutil.copytree(
+                folder,
+                os.path.join("Share", folder)
+            )
 
     # Copy source files
     files_to_copy = [
@@ -378,9 +228,12 @@ def package_project():
         if os.path.exists(file):
             shutil.copy(file, "Share")
 
-    # Copy data folder
-    if os.path.exists("data"):
-        shutil.copytree("data", "Share/data")
+    # Copy only the data files used by the project
+    data_files = list(SOURCES.values()) + list(SOCIAL_SOURCES.values())
+
+    for file in data_files:
+        if os.path.exists(file):
+            shutil.copy(file, "Share/data")
 
     # Create zip
     shutil.make_archive(
