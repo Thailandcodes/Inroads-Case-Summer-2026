@@ -625,3 +625,174 @@ def graph_social_sunbursts(social_data):
     fig.write_html(
         "outputs/html/interactive_ses_race_cause_sunburst.html"
     )
+def graph_original_bar_dashboard(sex_data, race_data):
+    """
+    One PNG dashboard for the main bar chart comparisons.
+    Replaces separate sex/race bar chart files.
+    """
+
+    fig, axes = plt.subplots(2, 1, figsize=(18, 14))
+
+    sns.barplot(
+        data=sex_data,
+        x="Sex",
+        y="Percent",
+        hue="Group",
+        ax=axes[0]
+    )
+
+    axes[0].set_title("Sex Distribution by Source and County")
+    axes[0].set_ylabel("Percent of Deaths")
+    axes[0].set_xlabel("Sex")
+
+    sns.barplot(
+        data=race_data,
+        x="Race",
+        y="Percent",
+        hue="Group",
+        ax=axes[1]
+    )
+
+    axes[1].set_title("Race Distribution by Source and County")
+    axes[1].set_ylabel("Percent of Deaths")
+    axes[1].set_xlabel("Race")
+    axes[1].tick_params(axis="x", rotation=35)
+
+    plt.tight_layout()
+    plt.savefig("outputs/png/original_demographic_bar_dashboard.png", dpi=200)
+    plt.close()
+
+
+def graph_original_pie_dashboards(sex_data, race_data, cause_data):
+    """
+    Creates dashboard PNGs instead of many separate pie chart files.
+    """
+
+    datasets = [
+        ("Sex", sex_data, "Sex", "original_sex_pie_dashboard.png"),
+        ("Race", race_data, "Race", "original_race_pie_dashboard.png"),
+        ("Top Causes", cause_data, "Cause", "original_cause_pie_dashboard.png")
+    ]
+
+    for title, data, category_col, filename in datasets:
+        groups = data[["Source", "Geography"]].drop_duplicates()
+
+        fig, axes = plt.subplots(3, 2, figsize=(18, 18))
+        axes = axes.flatten()
+
+        for i, (_, group) in enumerate(groups.iterrows()):
+            source = group["Source"]
+            county = group["Geography"]
+
+            temp = data[
+                (data["Source"] == source) &
+                (data["Geography"] == county)
+            ].copy()
+
+            if category_col == "Cause":
+                top_causes = (
+                    temp.groupby("Cause")["Deaths"]
+                    .sum()
+                    .sort_values(ascending=False)
+                    .head(6)
+                    .index
+                )
+
+                temp = temp[temp["Cause"].isin(top_causes)]
+
+            temp = (
+                temp.groupby(category_col)["Deaths"]
+                .sum()
+                .sort_values(ascending=False)
+            )
+
+            axes[i].pie(
+                temp.values,
+                labels=temp.index,
+                autopct="%1.1f%%",
+                startangle=90
+            )
+
+            axes[i].set_title(f"{source} - {county}")
+
+        for j in range(len(groups), len(axes)):
+            axes[j].axis("off")
+
+        fig.suptitle(f"{title} Distribution Dashboard", fontsize=18)
+        plt.tight_layout()
+        plt.savefig(f"outputs/png/{filename}", dpi=200)
+        plt.close()
+
+def graph_original_bar_dashboard(sex_data, race_data):
+    fig, axes = plt.subplots(2, 1, figsize=(18, 14))
+
+    sns.barplot(data=sex_data, x="Sex", y="Percent", hue="Group", ax=axes[0])
+    axes[0].set_title("Sex Distribution by Source and County")
+    axes[0].set_ylabel("Percent of Deaths")
+    axes[0].set_xlabel("Sex")
+
+    sns.barplot(data=race_data, x="Race", y="Percent", hue="Group", ax=axes[1])
+    axes[1].set_title("Race Distribution by Source and County")
+    axes[1].set_ylabel("Percent of Deaths")
+    axes[1].set_xlabel("Race")
+    axes[1].tick_params(axis="x", rotation=35)
+
+    plt.tight_layout()
+    plt.savefig("outputs/png/original_demographic_bar_dashboard.png", dpi=200)
+    plt.close()
+
+
+def graph_original_pie_dashboards(sex_data, race_data, cause_data):
+    datasets = [
+        ("Sex", sex_data, "Sex", "original_sex_pie_dashboard.png"),
+        ("Race", race_data, "Race", "original_race_pie_dashboard.png"),
+        ("Top Causes", cause_data, "Cause", "original_cause_pie_dashboard.png")
+    ]
+
+    for title, data, category_col, filename in datasets:
+        groups = data[["Source", "Geography"]].drop_duplicates()
+
+        fig, axes = plt.subplots(3, 2, figsize=(18, 18))
+        axes = axes.flatten()
+
+        for i, (_, group) in enumerate(groups.iterrows()):
+            source = group["Source"]
+            county = group["Geography"]
+
+            temp = data[
+                (data["Source"] == source) &
+                (data["Geography"] == county)
+            ].copy()
+
+            if category_col == "Cause":
+                top_causes = (
+                    temp.groupby("Cause")["Deaths"]
+                    .sum()
+                    .sort_values(ascending=False)
+                    .head(6)
+                    .index
+                )
+                temp = temp[temp["Cause"].isin(top_causes)]
+
+            temp = (
+                temp.groupby(category_col)["Deaths"]
+                .sum()
+                .sort_values(ascending=False)
+            )
+
+            axes[i].pie(
+                temp.values,
+                labels=temp.index,
+                autopct="%1.1f%%",
+                startangle=90
+            )
+
+            axes[i].set_title(f"{source} - {county}")
+
+        for j in range(len(groups), len(axes)):
+            axes[j].axis("off")
+
+        fig.suptitle(f"{title} Distribution Dashboard", fontsize=18)
+        plt.tight_layout()
+        plt.savefig(f"outputs/png/{filename}", dpi=200)
+        plt.close()

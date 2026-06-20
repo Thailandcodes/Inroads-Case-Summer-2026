@@ -1,4 +1,3 @@
-year,premiums_millions,services_millions,net_investment_income_millions,total_revenues_millions,health_care_costs_millions,mbr_percent,operating_expenses_millions,operating_income_loss_millions,adjusted_operating_income_millions,government_premium_revenues_millions,commercial_premium_revenues_millions,source
-2023,99144,5737,765,105646,85504,86.2,16193,3949,5577,70094,29050,"CVS Health 2025 Annual Report, page 70, Health Care Benefits Segment table"
-2024,122849,6343,1473,130665,113659,92.5,17990,-984,307,88433,34416,"CVS Health 2025 Annual Report, page 70, Health Care Benefits Segment table"
-2025,134749,6823,1782,143354,122949,91.2,18612,1793,2939,103362,31387,"CVS Health 2025 Annual Report, page 70, Health Care Benefits Segment table"
+version https://git-lfs.github.com/spec/v1
+oid sha256:cd2a2665aa6423dbf7e3a71811747078611794d2031f1fee8aa92d27bf78f67f
+size 749

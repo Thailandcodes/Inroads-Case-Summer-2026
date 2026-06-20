@@ -11,13 +11,15 @@ from helpers import (
 )
 
 from graphs import (
-    graph_sex_comparison,
-    graph_race_comparison,
     graph_heatmaps_by_source_and_county,
-    graph_pie_charts,
     graph_social_determinants,
     graph_race_social_breakdowns,
-    graph_social_sunbursts
+    graph_social_sunbursts,
+    graph_sex_comparison,
+    graph_race_comparison,
+    graph_pie_charts,
+    graph_original_bar_dashboard,
+    graph_original_pie_dashboards
 )
 
 
@@ -44,10 +46,9 @@ def main():
 
     print("\nCleaned datasets saved.")
 
-    graph_sex_comparison(sex_data)
-    graph_race_comparison(race_data)
+    graph_original_bar_dashboard(sex_data, race_data)
+    graph_original_pie_dashboards(sex_data, race_data, cause_data)
     graph_heatmaps_by_source_and_county(cause_data)
-    graph_pie_charts(sex_data, race_data, cause_data)
 
     print("\nStarting social determinants analysis...")
 

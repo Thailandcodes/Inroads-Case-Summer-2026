@@ -2,56 +2,73 @@
 
 ## INROADS Summer 2026 Case Competition
 
-### Team Members
-- Thailand Griffith
-- ___________________
+### Project Overview
+
+This project explores mortality trends in Fulton County and DeKalb County using public health datasets from three sources:
+
+* Georgia Rankable Causes
+* OASIS
+* NCHS Rankable Causes
+
+The project also analyzes social determinant patterns using education level and SES vulnerability data. The goal is to identify which populations are most affected by major causes of death and how those patterns differ by county, source, race, sex, education, and economic vulnerability.
 
 ---
 
-# Project Overview
+## Project Questions
 
-This project explores mortality trends in the Atlanta metropolitan area using three independent public health datasets.
+This analysis focuses on:
 
-Data Sources:
-
-- Georgia Rankable Causes
-- OASIS
-- NCHS Rankable Causes
-
-Counties:
-
-- Fulton County
-- DeKalb County
-
-The goal is to identify similarities, differences, and trends between counties while comparing the consistency of multiple public health data sources.
+* Which causes of death are most common in Fulton and DeKalb?
+* How do mortality patterns differ by race and sex?
+* Which education levels are most affected by specific causes of death?
+* Which SES vulnerability levels are most affected by specific causes of death?
+* How does race fit into education and SES mortality patterns?
 
 ---
 
-# Folder Structure
+## Folder Structure
 
-```
+```text
 AtlantaHealthEDA/
-
 │
 ├── data/
+│   ├── Georgia Rankable Causes Fulton and Dekalb 2024.xlsx
+│   ├── Oasis Rankable Causes Fulton and Dekalb 2024.xlsx
+│   ├── NCHS Rankable Causes Fulton and Dekalb 2024.xlsx
+│   ├── Georgia 2024.xlsx
+│   ├── Oasis 2024.xlsx
+│   └── NCHS 2024.xlsx
 │
 ├── outputs/
 │   ├── png/
 │   ├── html/
 │   └── csv/
 │
+├── explore_oasis.py
 ├── helpers.py
 ├── graphs.py
-├── explore_oasis.py
 ├── requirements.txt
 └── README.md
 ```
 
 ---
 
-# Installing
+## Technologies Used
 
-Install the required packages.
+* Python
+* Pandas
+* OpenPyXL
+* Matplotlib
+* Seaborn
+* Plotly
+
+---
+
+## Installation
+
+First, clone or open the project folder.
+
+Then install the required packages:
 
 ```bash
 pip install -r requirements.txt
@@ -59,115 +76,80 @@ pip install -r requirements.txt
 
 ---
 
-# Running the Project
+## How to Run
 
-Run
+Run the main analysis file:
 
 ```bash
 python explore_oasis.py
 ```
 
-The script will automatically
+The program will automatically:
 
-- Load all datasets
-- Clean the data
-- Normalize percentages
-- Create graphs
-- Create interactive dashboards
-- Export CSV files
-- Create a Share folder
-- Create a ZIP archive for sharing
-
----
-
-# Visualizations
-
-The project creates:
-
-## Overview
-
-- Total Deaths by Source and County
+* Create output folders
+* Load all Excel datasets
+* Clean the data
+* Normalize values into percentages where appropriate
+* Save cleaned CSV files
+* Generate PNG and SVG charts
+* Generate interactive HTML charts
+* Create a `Share/` folder
+* Create a shareable ZIP file called `AtlantaHealthEDA.zip`
 
 ---
 
-## Demographics
+## Output Files
 
-- Age Distribution
-- Race Distribution
-- Sex Distribution
+Static charts are saved here:
 
----
-
-## Causes of Death
-
-- Top Causes by Source
-- Top Causes by County
-- Heatmaps
-- Interactive Charts
-
----
-
-## Dashboard
-
-A one-page dashboard combines several important visualizations into a single figure suitable for presentations.
-
----
-
-# Output Files
-
-PNG graphs
-
-```
+```text
 outputs/png/
 ```
 
-Interactive HTML graphs
+Interactive charts are saved here:
 
-```
+```text
 outputs/html/
 ```
 
-CSV files
+Cleaned CSV files are saved here:
 
-```
+```text
 outputs/csv/
 ```
 
----
+The final shareable package is saved as:
 
-# Technologies Used
-
-- Python
-- Pandas
-- Matplotlib
-- Seaborn
-- Plotly
-- OpenPyXL
+```text
+AtlantaHealthEDA.zip
+```
 
 ---
 
-# Notes
+## Main Visualizations
 
-The analysis automatically normalizes demographic data using percentages where appropriate.
+The project generates:
 
-Average (mean) values are shown on graphs whenever they improve interpretation.
-
-Interactive Plotly visualizations are included for presentations and exploration.
-
----
-
-# Future Improvements
-
-Potential additions include
-
-- Correlation heatmaps
-- Animated visualizations
-- Population-adjusted death rates
-- Sankey diagrams
-- Treemaps
-- Radar charts
-- Streamlit dashboard
+* Sex distribution by source and county
+* Race distribution by source and county
+* Top causes of death heatmaps
+* Pie charts for sex, race, and causes of death
+* Education level by cause of death heatmaps
+* SES vulnerability by cause of death heatmaps
+* Race + education + cause mortality rankings
+* Race + SES vulnerability + cause mortality rankings
+* Interactive sunburst charts for education, SES, race, and cause of death
 
 ---
 
-Developed for the INROADS Summer 2026 Case Competition.
+## Notes
+
+The analysis uses percentages when comparing groups across counties or sources so that results are easier to compare.
+
+The interactive HTML files are useful for exploring the data more deeply and can be opened directly in a browser.
+
+---
+
+## Developed For
+
+INROADS Summer 2026 Case Competition
