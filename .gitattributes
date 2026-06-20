@@ -1,3 +1,4 @@
 *.zip filter=lfs diff=lfs merge=lfs -text
 AtlantaHealthEDA.zip filter=lfs diff=lfs merge=lfs -text
+*.csv filter=lfs diff=lfs merge=lfs -text
 data/CPSC_Enrollment_Info_2026_01.csv filter=lfs diff=lfs merge=lfs -text
