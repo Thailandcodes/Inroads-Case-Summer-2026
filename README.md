@@ -2,154 +2,86 @@
 
 ## INROADS Summer 2026 Case Competition
 
-### Project Overview
+This project analyzes mortality patterns in Fulton County and DeKalb County using Georgia Rankable Causes, OASIS, and NCHS datasets. It also analyzes education and SES vulnerability patterns to identify the communities most affected by major causes of death.
 
-This project explores mortality trends in Fulton County and DeKalb County using public health datasets from three sources:
+## Main Run Command
 
-* Georgia Rankable Causes
-* OASIS
-* NCHS Rankable Causes
-
-The project also analyzes social determinant patterns using education level and SES vulnerability data. The goal is to identify which populations are most affected by major causes of death and how those patterns differ by county, source, race, sex, education, and economic vulnerability.
-
----
-
-## Project Questions
-
-This analysis focuses on:
-
-* Which causes of death are most common in Fulton and DeKalb?
-* How do mortality patterns differ by race and sex?
-* Which education levels are most affected by specific causes of death?
-* Which SES vulnerability levels are most affected by specific causes of death?
-* How does race fit into education and SES mortality patterns?
-
----
-
-## Folder Structure
-
-```text
-AtlantaHealthEDA/
-│
-├── data/
-│   ├── Georgia Rankable Causes Fulton and Dekalb 2024.xlsx
-│   ├── Oasis Rankable Causes Fulton and Dekalb 2024.xlsx
-│   ├── NCHS Rankable Causes Fulton and Dekalb 2024.xlsx
-│   ├── Georgia 2024.xlsx
-│   ├── Oasis 2024.xlsx
-│   └── NCHS 2024.xlsx
-│
-├── outputs/
-│   ├── png/
-│   ├── html/
-│   └── csv/
-│
-├── explore_oasis.py
-├── helpers.py
-├── graphs.py
-├── requirements.txt
-└── README.md
-```
-
----
-
-## Technologies Used
-
-* Python
-* Pandas
-* OpenPyXL
-* Matplotlib
-* Seaborn
-* Plotly
-
----
-
-## Installation
-
-First, clone or open the project folder.
-
-Then install the required packages:
+Install packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-## How to Run
-
-Run the main analysis file:
+Run the full project:
 
 ```bash
-python explore_oasis.py
+python main.py
 ```
 
-The program will automatically:
+The older scripts can remain in the repository, but `main.py` is now the clean run file.
 
-* Create output folders
-* Load all Excel datasets
-* Clean the data
-* Normalize values into percentages where appropriate
-* Save cleaned CSV files
-* Generate PNG and SVG charts
-* Generate interactive HTML charts
-* Create a `Share/` folder
-* Create a shareable ZIP file called `AtlantaHealthEDA.zip`
+## Outputs
 
----
-
-## Output Files
-
-Static charts are saved here:
+After running `main.py`, the project creates:
 
 ```text
-outputs/png/
+outputs/png/       static dashboard images
+outputs/html/      interactive dashboards and drilldowns
+outputs/csv/       cleaned summary data
+outputs/report/    metrics_report.md
 ```
 
-Interactive charts are saved here:
+## Main Dashboards
+
+The project now creates fewer, cleaner dashboard files instead of dozens of repeated charts:
+
+- `dashboard_demographics.png`
+- `dashboard_health_burden.png`
+- `dashboard_social_determinants.png`
+- `dashboard_target_groups.png`
+- `dashboard_market_opportunity.png` if market opportunity data exists
+
+Interactive files are saved as HTML. The sunbursts are limited to top causes per group and shallow display depth so the labels do not become unreadable.
+
+## Data Files Needed
+
+Required mortality files:
 
 ```text
-outputs/html/
+data/Georgia Rankable Causes Fulton and Dekalb 2024.xlsx
+data/Oasis Rankable Causes Fulton and Dekalb 2024.xlsx
+data/NCHS Rankable Causes Fulton and Dekalb 2024.xlsx
 ```
 
-Cleaned CSV files are saved here:
+Required education and SES files:
 
 ```text
-outputs/csv/
+data/Georgia 2024.xlsx
+data/Oasis 2024.xlsx
+data/NCHS 2024.xlsx
 ```
 
-The final shareable package is saved as:
+Optional market file:
 
 ```text
-AtlantaHealthEDA.zip
+outputs/csv/market_opportunity_summary.csv
 ```
 
----
+If the optional market file exists, `main.py` adds a market opportunity dashboard and market metrics to the report.
 
-## Main Visualizations
+## Code Structure
 
-The project generates:
-
-* Sex distribution by source and county
-* Race distribution by source and county
-* Top causes of death heatmaps
-* Pie charts for sex, race, and causes of death
-* Education level by cause of death heatmaps
-* SES vulnerability by cause of death heatmaps
-* Race + education + cause mortality rankings
-* Race + SES vulnerability + cause mortality rankings
-* Interactive sunburst charts for education, SES, race, and cause of death
-
----
+```text
+main.py       runs the project in order
+helpers.py    loads and cleans data
+graphs.py     creates dashboards and interactive visuals
+style.py      keeps colors, fonts, and labels consistent
+report.py     creates the markdown metrics report
+```
 
 ## Notes
 
-The analysis uses percentages when comparing groups across counties or sources so that results are easier to compare.
-
-The interactive HTML files are useful for exploring the data more deeply and can be opened directly in a browser.
-
----
-
-## Developed For
-
-INROADS Summer 2026 Case Competition
+- Values are normalized into percentages where appropriate.
+- Labels are cleaned for presentation, so underscores and long technical labels are removed where possible.
+- PNG dashboards are meant for slides.
+- HTML files are meant for interactive exploration.
