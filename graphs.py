@@ -438,13 +438,13 @@ def make_age_cause_sunburst(data, source):
 
     current = keep_top_causes_per_group(
         current,
-        group_cols=["Geography", "Age"],
-        top_n=5
+        group_cols=["Geography"],
+        top_n=8
     )
 
     summary = (
         current.groupby(
-            ["Geography", "Age", "Cause"],
+            ["Geography", "Cause", "Age"],
             as_index=False
         )["Deaths"]
         .sum()
@@ -452,7 +452,7 @@ def make_age_cause_sunburst(data, source):
 
     fig = px.sunburst(
         summary,
-        path=["Geography", "Age", "Cause"],
+        path=["Geography", "Cause", "Age"],
         values="Deaths",
         title=f"{source}: Cause of Death by County and Age Group",
         color="Geography",
@@ -483,5 +483,5 @@ def make_age_cause_sunburst(data, source):
     )
 
     fig.write_html(
-        HTML_DIR / f"{source} Sunburst - County Age Disease.html"
+        HTML_DIR / f"{source} Sunburst - County Cause Age.html"
     )
