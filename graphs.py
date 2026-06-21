@@ -13,8 +13,49 @@ os.makedirs(PNG_DIR, exist_ok=True)
 os.makedirs(HTML_DIR, exist_ok=True)
 
 
+CAUSE_NAMES = {
+    "Diseases of Heart": "Heart Disease",
+    "Diseases of the Heart": "Heart Disease",
+    "Ischemic Heart and Vascular Disease": "Heart Disease",
+    "Cerebrovascular Disease": "Stroke",
+    "Malignant Neoplasms": "Cancer",
+    "Alzheimer's Disease": "Alzheimer's",
+    "Diabetes Mellitus": "Diabetes",
+    "Influenza and Pneumonia": "Flu & Pneumonia",
+    "All Other Endocrine, Nutritional and Metabolic Diseases": "Other Endocrine Diseases",
+    "All Other Diseases": "Other Diseases",
+    "All Other Diseases of the Nervous System": "Other Nervous System Diseases",
+    "Unintentional Injuries": "Unintentional Injury",
+    "Assault (Homicide)": "Homicide"
+}
+
+
+BAD_RACE_PATTERNS = (
+    "Selected|Total|All Races|Races|Unknown|Not Stated|Not Reported"
+)
+
+
 def short_label(value, width=28):
     return "\n".join(textwrap.wrap(clean_label(value), width))
+
+
+def clean_cause(value):
+    value = clean_label(value)
+    return CAUSE_NAMES.get(value, value)
+
+
+def clean_race_data(data):
+    current = data.copy()
+
+    current = current[
+        ~current["Race"].astype(str).str.contains(
+            BAD_RACE_PATTERNS,
+            case=False,
+            na=False
+        )
+    ]
+
+    return current
 
 
 def save_png(filename):
@@ -26,8 +67,10 @@ def save_png(filename):
 def add_bar_labels(ax, percent=False):
     for container in ax.containers:
         labels = []
+
         for value in container.datavalues:
             labels.append(format_percent(value) if percent else format_number(value))
+
         ax.bar_label(container, labels=labels, fontsize=9, padding=3)
 
 
@@ -62,6 +105,8 @@ def graph_heatmaps_by_source_and_county(cause_data):
 
             if current.empty:
                 continue
+
+            current["Cause"] = current["Cause"].apply(clean_cause)
 
             top_causes = (
                 current.groupby("Cause")["Percent"]
@@ -124,6 +169,12 @@ def graph_combined_pie_dashboards(sex_data, race_data, cause_data):
     nchs_sex = sex_data[sex_data["Source"] == "NCHS"].copy()
     nchs_race = race_data[race_data["Source"] == "NCHS"].copy()
     nchs_cause = cause_data[cause_data["Source"] == "NCHS"].copy()
+
+    non_nchs_race = clean_race_data(non_nchs_race)
+    nchs_race = clean_race_data(nchs_race)
+
+    non_nchs_cause["Cause"] = non_nchs_cause["Cause"].apply(clean_cause)
+    nchs_cause["Cause"] = nchs_cause["Cause"].apply(clean_cause)
 
     make_pie_dashboard(
         data=non_nchs_sex,
@@ -258,6 +309,8 @@ def make_social_heatmaps(social_data, social_col, file_label):
             if current.empty:
                 continue
 
+            current["Cause"] = current["Cause"].apply(clean_cause)
+
             current = keep_top_causes_per_group(
                 current,
                 group_cols=[social_col],
@@ -316,12 +369,16 @@ def graph_race_social_breakdowns(social_data):
         ("Georgia and OASIS", social_data[social_data["Source"] != "NCHS"].copy()),
         ("NCHS", social_data[social_data["Source"] == "NCHS"].copy())
     ]:
+        current_data = clean_race_data(current_data)
+
         for social_col, file_label in [
             ("Education", "Race and Education"),
             ("SES Vulnerability", "Race and SES")
         ]:
             if current_data.empty:
                 continue
+
+            current_data["Cause"] = current_data["Cause"].apply(clean_cause)
 
             current = keep_top_causes_per_group(
                 current_data,
@@ -364,29 +421,29 @@ def graph_social_sunbursts(social_data):
     make_sunburst(
         social_data=non_nchs,
         social_col="SES Vulnerability",
-        title="SES, Race, and Cause of Death",
-        filename="Sunburst - SES Race Cause.html"
+        title="SES, Cause, and Race",
+        filename="Sunburst - SES Cause Race.html"
     )
 
     make_sunburst(
         social_data=non_nchs,
         social_col="Education",
-        title="Education, Race, and Cause of Death",
-        filename="Sunburst - Education Race Cause.html"
+        title="Education, Cause, and Race",
+        filename="Sunburst - Education Cause Race.html"
     )
 
     make_sunburst(
         social_data=nchs,
         social_col="SES Vulnerability",
-        title="NCHS SES, Race, and Cause of Death",
-        filename="NCHS Sunburst - SES Race Cause.html"
+        title="NCHS SES, Cause, and Race",
+        filename="NCHS Sunburst - SES Cause Race.html"
     )
 
     make_sunburst(
         social_data=nchs,
         social_col="Education",
-        title="NCHS Education, Race, and Cause of Death",
-        filename="NCHS Sunburst - Education Race Cause.html"
+        title="NCHS Education, Cause, and Race",
+        filename="NCHS Sunburst - Education Cause Race.html"
     )
 
 
@@ -394,9 +451,14 @@ def make_sunburst(social_data, social_col, title, filename):
     if social_data.empty:
         return
 
+    current = social_data.copy()
+    current = clean_race_data(current)
+
+    current["Cause"] = current["Cause"].apply(clean_cause)
+
     current = keep_top_causes_per_group(
-        social_data.copy(),
-        group_cols=["Source", "Geography", social_col, "Race"],
+        current,
+        group_cols=["Source", "Geography", social_col],
         top_n=5
     )
 
@@ -408,7 +470,7 @@ def make_sunburst(social_data, social_col, title, filename):
 
     summary = (
         current.groupby(
-            ["Source", "Geography", social_col, "Race", "Cause"],
+            ["Source", "Geography", social_col, "Cause", "Race"],
             as_index=False
         )["Deaths"]
         .sum()
@@ -416,7 +478,7 @@ def make_sunburst(social_data, social_col, title, filename):
 
     fig = px.sunburst(
         summary,
-        path=["Source", "Geography", social_col, "Race", "Cause"],
+        path=["Source", "Geography", social_col, "Cause", "Race"],
         values="Deaths",
         title=title,
         color="Source",
@@ -426,7 +488,9 @@ def make_sunburst(social_data, social_col, title, filename):
     fig.update_traces(
         textinfo="label+percent parent",
         insidetextorientation="radial",
-        maxdepth=4
+        maxdepth=4,
+        textfont_size=13,
+        hovertemplate="<b>%{label}</b><br>Deaths: %{value:,.0f}<br>Share: %{percentParent:.1%}<extra></extra>"
     )
 
     fig.update_layout(
