@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from helpers import format_number
-from style import PNG_DIR, OUTPUT_DIR, FORECAST_COLORS, setup_chart_style
+from style import PNG_DIR, OUTPUT_DIR, setup_chart_style
 
 
 setup_chart_style()
@@ -16,6 +16,25 @@ PNG_DIR.mkdir(parents=True, exist_ok=True)
 
 REVENUE_PER_MEMBER = 5391
 CAPTURE_RATES = [0.01, 0.03, 0.05]
+
+CORAL_PRIMARY = "#C7462D"
+CORAL_SECONDARY = "#E87561"
+CORAL_LIGHT = "#F3B2A6"
+BURGUNDY = "#3B0D0C"
+BROWN_RED = "#8C3B2E"
+GOLD_ACCENT = "#D6A55C"
+
+FORECAST_COLORS = {
+    "Conservative": CORAL_SECONDARY,
+    "Base": CORAL_PRIMARY,
+    "Aggressive": BURGUNDY
+}
+
+CAPTURE_COLORS = {
+    "1%": CORAL_LIGHT,
+    "3%": CORAL_PRIMARY,
+    "5%": BURGUNDY
+}
 
 
 def load_data(path: Path = DATA_PATH) -> pd.DataFrame:
@@ -115,7 +134,10 @@ def build_aetna_market_opportunity():
             })
 
     opportunity = pd.DataFrame(rows)
-    opportunity.to_csv(OUTPUT_DIR / "incremental_aetna_market_opportunity.csv", index=False)
+    opportunity.to_csv(
+        OUTPUT_DIR / "incremental_aetna_market_opportunity.csv",
+        index=False
+    )
 
     return opportunity
 
@@ -130,7 +152,8 @@ def add_line_labels(x_values, y_values, money=False):
             label,
             ha="center",
             va="bottom",
-            fontsize=9
+            fontsize=9,
+            color=BURGUNDY
         )
 
 
@@ -141,8 +164,8 @@ def make_charts(df, forecast_df, opportunity_df):
         df["year"],
         df["total_revenues_millions"],
         marker="o",
-        linewidth=2.5,
-        color="#C7462D"
+        linewidth=2.8,
+        color=CORAL_PRIMARY
     )
 
     add_line_labels(df["year"], df["total_revenues_millions"], money=True)
@@ -162,17 +185,20 @@ def make_charts(df, forecast_df, opportunity_df):
         "Aggressive": "-."
     }
 
-    for scenario in forecast_df["Scenario"].unique():
+    for scenario in ["Conservative", "Base", "Aggressive"]:
         subset = forecast_df[forecast_df["Scenario"] == scenario]
+
+        if subset.empty:
+            continue
 
         plt.plot(
             subset["Year"],
             subset["Forecast Total Revenue Millions"],
             marker="o",
-            linewidth=2.7,
+            linewidth=2.8,
             linestyle=line_styles.get(scenario, "-"),
             label=scenario,
-            color=FORECAST_COLORS.get(scenario, "#C7462D")
+            color=FORECAST_COLORS[scenario]
         )
 
         add_line_labels(
@@ -200,10 +226,20 @@ def make_charts(df, forecast_df, opportunity_df):
         values="Incremental Revenue Millions"
     )
 
+    ordered_columns = ["1%", "3%", "5%"]
+    pivot = pivot[[col for col in ordered_columns if col in pivot.columns]]
+
+    bar_colors = [
+        CAPTURE_COLORS[col]
+        for col in pivot.columns
+    ]
+
     ax = pivot.plot(
         kind="bar",
         figsize=(10, 6),
-        color=["#F3B2A6", "#C7462D", "#3B0D0C"]
+        color=bar_colors,
+        edgecolor=BURGUNDY,
+        linewidth=0.6
     )
 
     plt.title("Potential Incremental Aetna Revenue from Age 65+ Opportunity")
@@ -213,7 +249,7 @@ def make_charts(df, forecast_df, opportunity_df):
     plt.legend(title="Capture Rate")
 
     for container in ax.containers:
-        ax.bar_label(container, fmt="$%.1fM", fontsize=9)
+        ax.bar_label(container, fmt="$%.1fM", fontsize=9, color=BURGUNDY)
 
     plt.tight_layout()
     plt.savefig(PNG_DIR / "Aetna Market Opportunity Revenue.png", dpi=200)
@@ -225,7 +261,10 @@ def run_forecast():
     forecast_df = build_segment_revenue_forecast(df)
     opportunity_df = build_aetna_market_opportunity()
 
-    forecast_df.to_csv(OUTPUT_DIR / "health_care_benefits_revenue_forecast.csv", index=False)
+    forecast_df.to_csv(
+        OUTPUT_DIR / "health_care_benefits_revenue_forecast.csv",
+        index=False
+    )
 
     make_charts(df, forecast_df, opportunity_df)
 
