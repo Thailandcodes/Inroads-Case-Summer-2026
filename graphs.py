@@ -414,63 +414,37 @@ def graph_race_social_breakdowns(social_data):
             save_png(f"{data_name} Mortality Ranking - {file_label}.png")
 
 
-def graph_social_sunbursts(social_data):
-    non_nchs = social_data[social_data["Source"] != "NCHS"].copy()
-    nchs = social_data[social_data["Source"] == "NCHS"].copy()
+def graph_age_cause_sunbursts(age_cause_data):
+    for source in sorted(age_cause_data["Source"].unique()):
+        current = age_cause_data[
+            age_cause_data["Source"] == source
+        ].copy()
 
-    make_sunburst(
-        social_data=non_nchs,
-        social_col="SES Vulnerability",
-        title="SES, Cause, and Race",
-        filename="Sunburst - SES Cause Race.html"
-    )
+        if current.empty:
+            continue
 
-    make_sunburst(
-        social_data=non_nchs,
-        social_col="Education",
-        title="Education, Cause, and Race",
-        filename="Sunburst - Education Cause Race.html"
-    )
-
-    make_sunburst(
-        social_data=nchs,
-        social_col="SES Vulnerability",
-        title="NCHS SES, Cause, and Race",
-        filename="NCHS Sunburst - SES Cause Race.html"
-    )
-
-    make_sunburst(
-        social_data=nchs,
-        social_col="Education",
-        title="NCHS Education, Cause, and Race",
-        filename="NCHS Sunburst - Education Cause Race.html"
-    )
+        make_age_cause_sunburst(
+            data=current,
+            source=source
+        )
 
 
-def make_sunburst(social_data, social_col, title, filename):
-    if social_data.empty:
-        return
-
-    current = social_data.copy()
-    current = clean_race_data(current)
+def make_age_cause_sunburst(data, source):
+    current = data.copy()
 
     current["Cause"] = current["Cause"].apply(clean_cause)
+    current["Age"] = current["Age"].apply(clean_label)
+    current["Geography"] = current["Geography"].apply(clean_label)
 
     current = keep_top_causes_per_group(
         current,
-        group_cols=["Source", "Geography", social_col],
+        group_cols=["Geography", "Age"],
         top_n=5
     )
 
-    current["Source"] = current["Source"].apply(clean_label)
-    current["Geography"] = current["Geography"].apply(clean_label)
-    current[social_col] = current[social_col].apply(clean_label)
-    current["Race"] = current["Race"].apply(clean_label)
-    current["Cause"] = current["Cause"].apply(clean_label)
-
     summary = (
         current.groupby(
-            ["Source", "Geography", social_col, "Cause", "Race"],
+            ["Geography", "Age", "Cause"],
             as_index=False
         )["Deaths"]
         .sum()
@@ -478,19 +452,27 @@ def make_sunburst(social_data, social_col, title, filename):
 
     fig = px.sunburst(
         summary,
-        path=["Source", "Geography", social_col, "Cause", "Race"],
+        path=["Geography", "Age", "Cause"],
         values="Deaths",
-        title=title,
-        color="Source",
-        color_discrete_map=SOURCE_COLORS
+        title=f"{source}: Cause of Death by County and Age Group",
+        color="Geography",
+        color_discrete_map={
+            "Fulton": "#003f5c",
+            "DeKalb": "#2f9e44"
+        }
     )
 
     fig.update_traces(
         textinfo="label+percent parent",
         insidetextorientation="radial",
-        maxdepth=4,
+        maxdepth=3,
         textfont_size=13,
-        hovertemplate="<b>%{label}</b><br>Deaths: %{value:,.0f}<br>Share: %{percentParent:.1%}<extra></extra>"
+        hovertemplate=(
+            "<b>%{label}</b><br>"
+            "Deaths: %{value:,.0f}<br>"
+            "Share: %{percentParent:.1%}"
+            "<extra></extra>"
+        )
     )
 
     fig.update_layout(
@@ -500,4 +482,6 @@ def make_sunburst(social_data, social_col, title, filename):
         margin=dict(t=80, l=20, r=20, b=20)
     )
 
-    fig.write_html(HTML_DIR / filename)
+    fig.write_html(
+        HTML_DIR / f"{source} Sunburst - County Age Disease.html"
+    )

@@ -210,3 +210,17 @@ def package_project():
 
     shutil.make_archive("AtlantaHealthEDA", "zip", "Share")
     print("Share folder and AtlantaHealthEDA.zip created.")
+
+def get_age_cause_data(data):
+    age_cause_data = data[
+        (data["Race"] == "Selected Races Total") &
+        (data["Sex"] == "Selected Sexes Total") &
+        (data["Age"] != "Selected Ages Total") &
+        (data["Cause"] != "Selected Causes Total")
+    ].copy()
+
+    age_cause_data = age_cause_data[
+        ~age_cause_data["Cause"].str.contains("Total", na=False)
+    ]
+
+    return age_cause_data
