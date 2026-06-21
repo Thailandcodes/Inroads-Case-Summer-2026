@@ -2,14 +2,14 @@
 
 ## Executive Summary
 
-This report connects mortality burden, social determinants, Aetna Medicare Advantage enrollment, age 65+ market opportunity, and CVS Health Care Benefits forecast outputs.
+This report tells the full project story from health burden to business opportunity. It begins by identifying the leading causes of death in Fulton and DeKalb Counties, then connects those outcomes to education and socioeconomic vulnerability. The analysis then shifts to CVS/Aetna's opportunity by comparing known Aetna Medicare Advantage enrollment against the age 65+ population and estimating potential incremental revenue under scenario-based capture assumptions.
 
 ## Method Notes
 
 - NCHS is kept separate from Georgia and OASIS because its categories are not directly comparable.
 - Age 65+ population is used as a proxy for Medicare-age market opportunity.
 - Forecast outputs use analyst assumptions, not CVS-reported projections.
-- HTML report includes interactive chart links. PDF report includes static chart images.
+- Interactive charts are generated separately in the `outputs/html` folder.
 
 ## Top Mortality Patterns
 

@@ -5,7 +5,14 @@ import seaborn as sns
 import plotly.express as px
 
 from helpers import clean_label, format_number, format_percent
-from style import PNG_DIR, HTML_DIR, SOURCE_COLORS, CHART_COLORS, setup_chart_style
+from style import (
+    PNG_DIR,
+    HTML_DIR,
+    SOURCE_COLORS,
+    COUNTY_COLORS,
+    CHART_COLORS,
+    setup_chart_style
+)
 
 
 setup_chart_style()
@@ -28,7 +35,6 @@ CAUSE_NAMES = {
     "Unintentional Injuries": "Unintentional Injury",
     "Assault (Homicide)": "Homicide"
 }
-
 
 BAD_RACE_PATTERNS = (
     "Selected|Total|All Races|Races|Unknown|Not Stated|Not Reported"
@@ -81,12 +87,14 @@ def keep_top_causes_per_group(data, group_cols, top_n=5):
         .sort_values("Deaths", ascending=False)
     )
 
-    ranked["Rank"] = ranked.groupby(group_cols)["Deaths"].rank(
-        method="first",
-        ascending=False
-    )
-
-    ranked = ranked[ranked["Rank"] <= top_n]
+    if group_cols:
+        ranked["Rank"] = ranked.groupby(group_cols)["Deaths"].rank(
+            method="first",
+            ascending=False
+        )
+        ranked = ranked[ranked["Rank"] <= top_n]
+    else:
+        ranked = ranked.head(top_n)
 
     return data.merge(
         ranked[group_cols + ["Cause"]],
@@ -132,7 +140,7 @@ def graph_heatmaps_by_source_and_county(cause_data):
                 pivot,
                 annot=True,
                 fmt=".1f",
-                cmap="Blues",
+                cmap="Reds",
                 linewidths=0.5,
                 cbar_kws={"label": "Percent of Deaths"}
             )
@@ -146,14 +154,16 @@ def graph_heatmaps_by_source_and_county(cause_data):
             fig = px.imshow(
                 pivot,
                 text_auto=".1f",
-                color_continuous_scale="Blues",
+                color_continuous_scale="Reds",
                 title=f"Top Causes of Death: {source} - {county}"
             )
 
             fig.update_layout(
-                font=dict(size=13),
+                font=dict(size=13, color="#3B0D0C"),
                 xaxis_title="",
-                yaxis_title="Cause of Death"
+                yaxis_title="Cause of Death",
+                paper_bgcolor="white",
+                plot_bgcolor="white"
             )
 
             fig.write_html(
@@ -232,7 +242,7 @@ def make_pie_dashboard(data, category_col, title, filename, top_n=None):
     )
 
     rows = 2 if len(groups) <= 4 else 3
-    fig, axes = plt.subplots(rows, 2, figsize=(18, rows * 5.5))
+    fig, axes = plt.subplots(rows, 2, figsize=(18, rows * 5.8))
     axes = axes.flatten()
 
     for i, (_, group) in enumerate(groups.iterrows()):
@@ -266,13 +276,23 @@ def make_pie_dashboard(data, category_col, title, filename, top_n=None):
 
         pie_data.index = [clean_label(x) for x in pie_data.index]
 
-        axes[i].pie(
+        wedges, texts, autotexts = axes[i].pie(
             pie_data.values,
-            labels=pie_data.index,
+            labels=None,
             autopct="%1.1f%%",
             startangle=90,
             colors=CHART_COLORS[:len(pie_data)],
+            pctdistance=0.75,
             textprops={"fontsize": 9}
+        )
+
+        axes[i].legend(
+            wedges,
+            pie_data.index,
+            title=category_col,
+            loc="center left",
+            bbox_to_anchor=(1.0, 0.5),
+            fontsize=8
         )
 
         axes[i].set_title(f"{source} - {county}", fontsize=12)
@@ -334,7 +354,7 @@ def make_social_heatmaps(social_data, social_col, file_label):
                 pivot,
                 annot=True,
                 fmt=".0f",
-                cmap="Blues",
+                cmap="Reds",
                 linewidths=0.5,
                 cbar_kws={"label": "Deaths"}
             )
@@ -349,14 +369,16 @@ def make_social_heatmaps(social_data, social_col, file_label):
             fig = px.imshow(
                 pivot,
                 text_auto=".0f",
-                color_continuous_scale="Blues",
+                color_continuous_scale="Reds",
                 title=f"{file_label} by Cause of Death: {source} - {county}"
             )
 
             fig.update_layout(
-                font=dict(size=13),
+                font=dict(size=13, color="#3B0D0C"),
                 xaxis_title="Cause of Death",
-                yaxis_title=file_label
+                yaxis_title=file_label,
+                paper_bgcolor="white",
+                plot_bgcolor="white"
             )
 
             fig.write_html(
@@ -403,7 +425,7 @@ def graph_race_social_breakdowns(social_data):
                 data=summary,
                 y="Group",
                 x="Deaths",
-                color="#003f5c"
+                color="#C7462D"
             )
 
             ax.set_title(f"{data_name}: Highest Mortality Groups - {file_label}")
@@ -435,17 +457,11 @@ def make_age_cause_sunburst(data, source):
     current["Cause"] = current["Cause"].apply(clean_cause)
     current["Age"] = current["Age"].apply(clean_label)
 
-    top_causes = (
-    current.groupby("Cause")["Deaths"]
-    .sum()
-    .sort_values(ascending=False)
-    .head(5)
-    .index
-)
-
-    current = current[
-    current["Cause"].isin(top_causes)
-]
+    current = keep_top_causes_per_group(
+        current,
+        group_cols=[],
+        top_n=5
+    )
 
     summary = (
         current.groupby(
@@ -459,7 +475,7 @@ def make_age_cause_sunburst(data, source):
         summary,
         path=["Cause", "Age"],
         values="Deaths",
-        title=f"{source}: Cause of Death by Disease and Age Group",
+        title=f"{source}: Top 5 Causes of Death by Age Group",
         color="Cause",
         color_discrete_sequence=CHART_COLORS
     )

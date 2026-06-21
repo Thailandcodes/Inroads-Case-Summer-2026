@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from helpers import format_number
-from style import PNG_DIR, OUTPUT_DIR, setup_chart_style
+from style import PNG_DIR, OUTPUT_DIR, FORECAST_COLORS, setup_chart_style
 
 
 setup_chart_style()
@@ -137,7 +137,14 @@ def add_line_labels(x_values, y_values, money=False):
 def make_charts(df, forecast_df, opportunity_df):
     plt.figure(figsize=(8, 5))
 
-    plt.plot(df["year"], df["total_revenues_millions"], marker="o", color="#003f5c")
+    plt.plot(
+        df["year"],
+        df["total_revenues_millions"],
+        marker="o",
+        linewidth=2.5,
+        color="#C7462D"
+    )
+
     add_line_labels(df["year"], df["total_revenues_millions"], money=True)
 
     plt.title("CVS Health Care Benefits Revenue")
@@ -149,10 +156,10 @@ def make_charts(df, forecast_df, opportunity_df):
 
     plt.figure(figsize=(9, 5))
 
-    scenario_colors = {
-        "Conservative": "#2f9e44",
-        "Base": "#003f5c",
-        "Aggressive": "#d9480f"
+    line_styles = {
+        "Conservative": "--",
+        "Base": "-",
+        "Aggressive": "-."
     }
 
     for scenario in forecast_df["Scenario"].unique():
@@ -162,8 +169,10 @@ def make_charts(df, forecast_df, opportunity_df):
             subset["Year"],
             subset["Forecast Total Revenue Millions"],
             marker="o",
+            linewidth=2.7,
+            linestyle=line_styles.get(scenario, "-"),
             label=scenario,
-            color=scenario_colors.get(scenario, "#003f5c")
+            color=FORECAST_COLORS.get(scenario, "#C7462D")
         )
 
         add_line_labels(
@@ -191,7 +200,11 @@ def make_charts(df, forecast_df, opportunity_df):
         values="Incremental Revenue Millions"
     )
 
-    ax = pivot.plot(kind="bar", figsize=(10, 6), color=["#2f9e44", "#003f5c", "#d9480f"])
+    ax = pivot.plot(
+        kind="bar",
+        figsize=(10, 6),
+        color=["#F3B2A6", "#C7462D", "#3B0D0C"]
+    )
 
     plt.title("Potential Incremental Aetna Revenue from Age 65+ Opportunity")
     plt.xlabel("County")
