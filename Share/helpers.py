@@ -5,15 +5,20 @@ import pandas as pd
 
 
 SOURCES = {
-    "Georgia": "data/Georgia Rankable Causes Fulton and Dekalb 2024.xlsx",
-    "OASIS": "data/Oasis Rankable Causes Fulton and Dekalb 2024.xlsx",
-    "NCHS": "data/NCHS Rankable Causes Fulton and Dekalb 2024.xlsx"
+    "Georgia Rankable Causes - Department of Public Health (DPH)":
+        "data/Georgia Rankable Causes Fulton and Dekalb 2024.xlsx",
+
+    "Online Analytical Statistical Information System (OASIS)":
+        "data/Oasis Rankable Causes Fulton and Dekalb 2024.xlsx",
+
+    "National Center for Health Statistics (NCHS)":
+        "data/NCHS Rankable Causes Fulton and Dekalb 2024.xlsx"
 }
 
 SOCIAL_SOURCES = {
-    "Georgia": "data/Georgia 2024.xlsx",
-    "OASIS": "data/Oasis 2024.xlsx",
-    "NCHS": "data/NCHS 2024.xlsx"
+    "Georgia Rankable Causes - Department of Public Health (DPH)": "data/Georgia 2024.xlsx",
+    "Online Analytical Statistical Information System (OASIS)": "data/Oasis 2024.xlsx",
+    "National Center for Health Statistics (NCHS)": "data/NCHS 2024.xlsx"
 }
 
 OUTPUT_FOLDERS = [

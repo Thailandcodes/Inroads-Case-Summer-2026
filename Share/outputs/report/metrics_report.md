@@ -13,43 +13,43 @@ This report tells the full project story from health burden to business opportun
 
 ## Top Mortality Patterns
 
-| Source   | Geography   | Cause                                                                      |   Deaths |
-|:---------|:------------|:---------------------------------------------------------------------------|---------:|
-| NCHS     | Fulton      | Malignant Neoplasms                                                        |     1409 |
-| NCHS     | Fulton      | Diseases of Heart                                                          |     1369 |
-| NCHS     | DeKalb      | Malignant Neoplasms                                                        |     1086 |
-| NCHS     | DeKalb      | Diseases of Heart                                                          |     1070 |
-| Georgia  | Fulton      | Ischemic Heart and Vascular Disease                                        |      492 |
-| NCHS     | Fulton      | Unintentional Injuries                                                     |      480 |
-| Georgia  | Fulton      | Essential (Primary) Hypertension and Hypertensive Renal, and Heart Disease |      456 |
-| Georgia  | Fulton      | All Other Diseases of the Nervous System                                   |      455 |
-| OASIS    | Fulton      | All other Diseases of the Nervous System                                   |      455 |
-| OASIS    | Fulton      | Obstructive Heart Disease (incl. Heart Attack)                             |      428 |
-| Georgia  | Fulton      | Cerebrovascular Disease                                                    |      399 |
-| Georgia  | DeKalb      | Ischemic Heart and Vascular Disease                                        |      399 |
-| NCHS     | Fulton      | Cerebrovascular Diseases                                                   |      399 |
-| OASIS    | Fulton      | Stroke                                                                     |      399 |
-| NCHS     | DeKalb      | Unintentional Injuries                                                     |      369 |
+| Source                                                      | Geography   | Cause                                                                      |   Deaths |
+|:------------------------------------------------------------|:------------|:---------------------------------------------------------------------------|---------:|
+| National Center for Health Statistics (NCHS)                | Fulton      | Malignant Neoplasms                                                        |     1409 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Diseases of Heart                                                          |     1369 |
+| National Center for Health Statistics (NCHS)                | DeKalb      | Malignant Neoplasms                                                        |     1086 |
+| National Center for Health Statistics (NCHS)                | DeKalb      | Diseases of Heart                                                          |     1070 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Ischemic Heart and Vascular Disease                                        |      492 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Unintentional Injuries                                                     |      480 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Essential (Primary) Hypertension and Hypertensive Renal, and Heart Disease |      456 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | All Other Diseases of the Nervous System                                   |      455 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | All other Diseases of the Nervous System                                   |      455 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Obstructive Heart Disease (incl. Heart Attack)                             |      428 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Cerebrovascular Disease                                                    |      399 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | DeKalb      | Ischemic Heart and Vascular Disease                                        |      399 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Cerebrovascular Diseases                                                   |      399 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Stroke                                                                     |      399 |
+| National Center for Health Statistics (NCHS)                | DeKalb      | Unintentional Injuries                                                     |      369 |
 
 ## Social Determinants Patterns
 
-| Source   | Geography   | Education                 | SES Vulnerability                | Race                 | Cause                                                                      |   Deaths |
-|:---------|:------------|:--------------------------|:---------------------------------|:---------------------|:---------------------------------------------------------------------------|---------:|
-| Georgia  | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Ischemic Heart and Vascular Disease                                        |      930 |
-| OASIS    | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All other Diseases of the Nervous System                                   |      892 |
-| Georgia  | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All Other Diseases of the Nervous System                                   |      892 |
-| NCHS     | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All other Diseases of the Nervous System                                   |      892 |
-| Georgia  | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Essential (Primary) Hypertension and Hypertensive Renal, and Heart Disease |      886 |
-| NCHS     | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      812 |
-| OASIS    | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      812 |
-| Georgia  | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Ischemic Heart and Vascular Disease                                        |      774 |
-| OASIS    | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Stroke                                                                     |      764 |
-| NCHS     | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Stroke                                                                     |      764 |
-| Georgia  | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Cerebrovascular Disease                                                    |      764 |
-| OASIS    | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      698 |
-| NCHS     | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      698 |
-| OASIS    | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All other Diseases of the Nervous System                                   |      668 |
-| Georgia  | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All Other Diseases of the Nervous System                                   |      668 |
+| Source                                                      | Geography   | Education                 | SES Vulnerability                | Race                 | Cause                                                                      |   Deaths |
+|:------------------------------------------------------------|:------------|:--------------------------|:---------------------------------|:---------------------|:---------------------------------------------------------------------------|---------:|
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Ischemic Heart and Vascular Disease                                        |      930 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All other Diseases of the Nervous System                                   |      892 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All Other Diseases of the Nervous System                                   |      892 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All other Diseases of the Nervous System                                   |      892 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Essential (Primary) Hypertension and Hypertensive Renal, and Heart Disease |      886 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      812 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      812 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Ischemic Heart and Vascular Disease                                        |      774 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Stroke                                                                     |      764 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Stroke                                                                     |      764 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Cerebrovascular Disease                                                    |      764 |
+| Online Analytical Statistical Information System (OASIS)    | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      698 |
+| National Center for Health Statistics (NCHS)                | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | Obstructive Heart Disease (incl. Heart Attack)                             |      698 |
+| Online Analytical Statistical Information System (OASIS)    | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All other Diseases of the Nervous System                                   |      668 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | DeKalb      | Selected Educations Total | Selected SES Vulnerability Total | Selected Races Total | All Other Diseases of the Nervous System                                   |      668 |
 
 ## Aetna Enrollment
 

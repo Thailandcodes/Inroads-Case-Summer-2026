@@ -13,6 +13,10 @@ OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 PNG_DIR.mkdir(parents=True, exist_ok=True)
 
+PRIMARY = "#C7462D"
+SECONDARY = "#E87561"
+DARK = "#3B0D0C"
+
 
 AETNA_CONTRACTS = [
     "H1608",
@@ -143,10 +147,16 @@ def make_chart(summary: pd.DataFrame):
     bars = plt.bar(
         chart_df["County"],
         chart_df["Known Enrollment"],
-        color="#003f5c"
+        color=[PRIMARY, SECONDARY],
+        edgecolor=DARK,
+        linewidth=0.7
     )
 
-    plt.title("Known Aetna Medicare Advantage Enrollment")
+    plt.title(
+        "Known Aetna Medicare Advantage Enrollment",
+        fontweight="bold",
+        color=DARK
+    )
     plt.xlabel("County")
     plt.ylabel("Known Enrollment")
 
@@ -157,7 +167,8 @@ def make_chart(summary: pd.DataFrame):
             height,
             format_number(height),
             ha="center",
-            va="bottom"
+            va="bottom",
+            color=DARK
         )
 
     plt.tight_layout()

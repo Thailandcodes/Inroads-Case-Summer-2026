@@ -14,6 +14,12 @@ AETNA_PATH = Path("outputs/aetna_fulton_dekalb_county_totals.csv")
 PNG_DIR.mkdir(parents=True, exist_ok=True)
 CSV_DIR.mkdir(parents=True, exist_ok=True)
 
+PRIMARY = "#C7462D"
+SECONDARY = "#E87561"
+LIGHT = "#F3B2A6"
+DARK = "#3B0D0C"
+MUTED = "#8C3B2E"
+
 
 def clean_number(value):
     return int(str(value).replace(",", "").strip())
@@ -82,7 +88,8 @@ def add_labels(ax, values, percent=False):
             label,
             ha="center",
             va="bottom",
-            fontsize=10
+            fontsize=10,
+            color=DARK
         )
 
 
@@ -92,25 +99,50 @@ def make_market_opportunity_dashboard(summary):
     fig.suptitle(
         "CVS / Aetna Medicare Market Opportunity",
         fontsize=20,
-        fontweight="bold"
+        fontweight="bold",
+        color=DARK
     )
 
-    axes[0, 0].bar(summary["County"], summary["Age 65+ Population"], color="#003f5c")
+    axes[0, 0].bar(
+        summary["County"],
+        summary["Age 65+ Population"],
+        color=PRIMARY,
+        edgecolor=DARK,
+        linewidth=0.7
+    )
     axes[0, 0].set_title("Population Age 65+")
     axes[0, 0].set_ylabel("Residents")
     add_labels(axes[0, 0], summary["Age 65+ Population"])
 
-    axes[0, 1].bar(summary["County"], summary["Known Enrollment"], color="#2f9e44")
+    axes[0, 1].bar(
+        summary["County"],
+        summary["Known Enrollment"],
+        color=SECONDARY,
+        edgecolor=DARK,
+        linewidth=0.7
+    )
     axes[0, 1].set_title("Known Aetna Medicare Advantage Enrollment")
     axes[0, 1].set_ylabel("Members")
     add_labels(axes[0, 1], summary["Known Enrollment"])
 
-    axes[1, 0].bar(summary["County"], summary["Penetration Rate"], color="#f59f00")
+    axes[1, 0].bar(
+        summary["County"],
+        summary["Penetration Rate"],
+        color=MUTED,
+        edgecolor=DARK,
+        linewidth=0.7
+    )
     axes[1, 0].set_title("Aetna Penetration of Age 65+ Population")
     axes[1, 0].set_ylabel("Percent")
     add_labels(axes[1, 0], summary["Penetration Rate"], percent=True)
 
-    axes[1, 1].bar(summary["County"], summary["Remaining Opportunity"], color="#7048e8")
+    axes[1, 1].bar(
+        summary["County"],
+        summary["Remaining Opportunity"],
+        color=LIGHT,
+        edgecolor=DARK,
+        linewidth=0.7
+    )
     axes[1, 1].set_title("Remaining Age 65+ Opportunity")
     axes[1, 1].set_ylabel("Residents")
     add_labels(axes[1, 1], summary["Remaining Opportunity"])
@@ -123,8 +155,20 @@ def make_market_opportunity_dashboard(summary):
 def make_penetration_dashboard(summary):
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    ax.bar(summary["County"], summary["Penetration Rate"], color="#003f5c")
-    ax.set_title("Aetna Medicare Advantage Penetration", fontsize=16, fontweight="bold")
+    ax.bar(
+        summary["County"],
+        summary["Penetration Rate"],
+        color=PRIMARY,
+        edgecolor=DARK,
+        linewidth=0.7
+    )
+
+    ax.set_title(
+        "Aetna Medicare Advantage Penetration",
+        fontsize=16,
+        fontweight="bold",
+        color=DARK
+    )
     ax.set_ylabel("Aetna Members as Percent of Age 65+ Population")
     ax.set_xlabel("County")
 
@@ -135,7 +179,7 @@ def make_penetration_dashboard(summary):
         "Aetna enrollment reflects known enrollment only."
     )
 
-    fig.text(0.5, 0.01, note, ha="center", fontsize=9)
+    fig.text(0.5, 0.01, note, ha="center", fontsize=9, color=DARK)
 
     plt.tight_layout(rect=[0, 0.05, 1, 1])
     plt.savefig(PNG_DIR / "Aetna Age 65 Penetration Dashboard.png", dpi=200)
