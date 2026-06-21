@@ -263,10 +263,7 @@ def make_pie_dashboard(data, category_col, title, filename, top_n=None):
                 .index
             )
 
-            current[category_col] = current[category_col].where(
-                current[category_col].isin(top_values),
-                "Other"
-            )
+            current = current[current[category_col].isin(top_values)]
 
         pie_data = (
             current.groupby(category_col)["Deaths"]
