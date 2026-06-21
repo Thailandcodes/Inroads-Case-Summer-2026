@@ -11,25 +11,25 @@ REPORT_DIR = OUTPUT_DIR / "report"
 
 
 SOURCE_COLORS = {
-    "Georgia": "#1f77b4",
-    "OASIS": "#2ca02c",
-    "NCHS": "#9467bd"
+    "Georgia": "#C7462D",
+    "OASIS": "#E87561",
+    "NCHS": "#3B0D0C"
 }
 
 COUNTY_COLORS = {
-    "Fulton": "#003f5c",
-    "DeKalb": "#2f9e44"
+    "Fulton": "#C7462D",
+    "DeKalb": "#E87561"
 }
 
 CHART_COLORS = [
-    "#003f5c",
-    "#2f9e44",
-    "#f59f00",
-    "#d9480f",
-    "#7048e8",
-    "#0ca678",
-    "#e03131",
-    "#1971c2"
+    "#C7462D",
+    "#E87561",
+    "#F3B2A6",
+    "#3B0D0C",
+    "#8C3B2E",
+    "#D95F45",
+    "#F0A08E",
+    "#6F1D1B"
 ]
 
 

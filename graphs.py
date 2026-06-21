@@ -434,17 +434,22 @@ def make_age_cause_sunburst(data, source):
 
     current["Cause"] = current["Cause"].apply(clean_cause)
     current["Age"] = current["Age"].apply(clean_label)
-    current["Geography"] = current["Geography"].apply(clean_label)
 
-    current = keep_top_causes_per_group(
-        current,
-        group_cols=["Geography"],
-        top_n=8
-    )
+    top_causes = (
+    current.groupby("Cause")["Deaths"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(5)
+    .index
+)
+
+    current = current[
+    current["Cause"].isin(top_causes)
+]
 
     summary = (
         current.groupby(
-            ["Geography", "Cause", "Age"],
+            ["Cause", "Age"],
             as_index=False
         )["Deaths"]
         .sum()
@@ -452,20 +457,17 @@ def make_age_cause_sunburst(data, source):
 
     fig = px.sunburst(
         summary,
-        path=["Geography", "Cause", "Age"],
+        path=["Cause", "Age"],
         values="Deaths",
-        title=f"{source}: Cause of Death by County and Age Group",
-        color="Geography",
-        color_discrete_map={
-            "Fulton": "#003f5c",
-            "DeKalb": "#2f9e44"
-        }
+        title=f"{source}: Cause of Death by Disease and Age Group",
+        color="Cause",
+        color_discrete_sequence=CHART_COLORS
     )
 
     fig.update_traces(
         textinfo="label+percent parent",
         insidetextorientation="radial",
-        maxdepth=3,
+        maxdepth=2,
         textfont_size=13,
         hovertemplate=(
             "<b>%{label}</b><br>"
@@ -478,10 +480,12 @@ def make_age_cause_sunburst(data, source):
     fig.update_layout(
         width=1200,
         height=850,
-        font=dict(size=14),
+        font=dict(size=14, color="#3B0D0C"),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
         margin=dict(t=80, l=20, r=20, b=20)
     )
 
     fig.write_html(
-        HTML_DIR / f"{source} Sunburst - County Cause Age.html"
+        HTML_DIR / f"{source} Sunburst - Disease Age.html"
     )
