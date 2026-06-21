@@ -2,34 +2,41 @@
 
 ## INROADS Summer 2026 Case Competition
 
-### Project Overview
+This project analyzes health burden, social determinants, Aetna Medicare Advantage enrollment, age 65+ market opportunity, and CVS Health Care Benefits revenue trends for Fulton County and DeKalb County.
 
-This project explores mortality trends in Fulton County and DeKalb County using public health datasets from three sources:
+## Main Question
 
-* Georgia Rankable Causes
-* OASIS
-* NCHS Rankable Causes
+Which communities in Fulton and DeKalb show the strongest health burden, and where does CVS/Aetna have an opportunity to expand preventive care outreach?
 
-The project also analyzes social determinant patterns using education level and SES vulnerability data. The goal is to identify which populations are most affected by major causes of death and how those patterns differ by county, source, race, sex, education, and economic vulnerability.
+## Sources Used
 
----
+- Georgia Rankable Causes Fulton and DeKalb 2024
+- OASIS Rankable Causes Fulton and DeKalb 2024
+- NCHS Rankable Causes Fulton and DeKalb 2024
+- Georgia, OASIS, and NCHS social determinants data
+- CMS CPSC Medicare Advantage enrollment data
+- U.S. Census ACS S0101 Age and Sex data
+- CVS Health Care Benefits segment revenue data, 2023-2025
 
-## Project Questions
+## Important Note About NCHS
 
-This analysis focuses on:
+NCHS is kept separate from Georgia and OASIS in combined visuals because its categories and structure are not directly comparable. The program generates separate NCHS charts.
 
-* Which causes of death are most common in Fulton and DeKalb?
-* How do mortality patterns differ by race and sex?
-* Which education levels are most affected by specific causes of death?
-* Which SES vulnerability levels are most affected by specific causes of death?
-* How does race fit into education and SES mortality patterns?
-
----
-
-## Folder Structure
+## Project Structure
 
 ```text
 AtlantaHealthEDA/
+│
+├── main.py
+├── helpers.py
+├── graphs.py
+├── style.py
+├── report.py
+├── analyze_aetna_ma_enrollment.py
+├── market_dashboards.py
+├── forecast.py
+├── requirements.txt
+├── README.md
 │
 ├── data/
 │   ├── Georgia Rankable Causes Fulton and Dekalb 2024.xlsx
@@ -37,119 +44,59 @@ AtlantaHealthEDA/
 │   ├── NCHS Rankable Causes Fulton and Dekalb 2024.xlsx
 │   ├── Georgia 2024.xlsx
 │   ├── Oasis 2024.xlsx
-│   └── NCHS 2024.xlsx
+│   ├── NCHS 2024.xlsx
+│   ├── CPSC_Enrollment_Info_2026_01.csv
+│   ├── ACSST1Y2024.S0101-2026-06-20T225846.csv
+│   └── cvs_health_care_benefits_2023_2025.csv
 │
-├── outputs/
-│   ├── png/
-│   ├── html/
-│   └── csv/
-│
-├── explore_oasis.py
-├── helpers.py
-├── graphs.py
-├── requirements.txt
-└── README.md
+└── outputs/
+    ├── png/
+    ├── html/
+    ├── csv/
+    └── report/
 ```
 
----
-
-## Technologies Used
-
-* Python
-* Pandas
-* OpenPyXL
-* Matplotlib
-* Seaborn
-* Plotly
-
----
-
-## Installation
-
-First, clone or open the project folder.
-
-Then install the required packages:
+## Install Requirements
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-## How to Run
-
-Run the main analysis file:
+## Run Everything
 
 ```bash
-python explore_oasis.py
+python main.py
 ```
 
-The program will automatically:
+## Outputs
 
-* Create output folders
-* Load all Excel datasets
-* Clean the data
-* Normalize values into percentages where appropriate
-* Save cleaned CSV files
-* Generate PNG and SVG charts
-* Generate interactive HTML charts
-* Create a `Share/` folder
-* Create a shareable ZIP file called `AtlantaHealthEDA.zip`
+The program creates:
 
----
+- Separate health burden heatmaps by source and county
+- Combined Georgia/OASIS pie dashboards
+- Separate NCHS pie dashboards
+- Education and SES heatmaps
+- Race + education and race + SES rankings
+- Sunburst charts for Georgia/OASIS
+- Separate NCHS sunburst charts
+- Aetna enrollment chart
+- Age 65+ market opportunity dashboard
+- CVS Health Care Benefits forecast charts
+- Aetna market opportunity revenue chart
+- Markdown report with project metrics
 
-## Output Files
-
-Static charts are saved here:
+The metrics report is saved here:
 
 ```text
-outputs/png/
+outputs/report/metrics_report.md
 ```
 
-Interactive charts are saved here:
+## Run Individual Parts
 
-```text
-outputs/html/
+```bash
+python analyze_aetna_ma_enrollment.py
+python market_dashboards.py
+python forecast.py
 ```
 
-Cleaned CSV files are saved here:
-
-```text
-outputs/csv/
-```
-
-The final shareable package is saved as:
-
-```text
-AtlantaHealthEDA.zip
-```
-
----
-
-## Main Visualizations
-
-The project generates:
-
-* Sex distribution by source and county
-* Race distribution by source and county
-* Top causes of death heatmaps
-* Pie charts for sex, race, and causes of death
-* Education level by cause of death heatmaps
-* SES vulnerability by cause of death heatmaps
-* Race + education + cause mortality rankings
-* Race + SES vulnerability + cause mortality rankings
-* Interactive sunburst charts for education, SES, race, and cause of death
-
----
-
-## Notes
-
-The analysis uses percentages when comparing groups across counties or sources so that results are easier to compare.
-
-The interactive HTML files are useful for exploring the data more deeply and can be opened directly in a browser.
-
----
-
-## Developed For
-
-INROADS Summer 2026 Case Competition
+Use `python main.py` for the final full analysis.
