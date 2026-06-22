@@ -436,7 +436,7 @@ def build_markdown_report(
         "prevention, food access, medication adherence, screening, transportation, "
         "and consistent care.\n\n"
     )
-    markdown += markdown_image_gallery(["Health Burden Heatmap - *.png"])
+    markdown += markdown_image_gallery(["Health Burden Heatmap - *OASIS* - *.png"])
     markdown += "\n### Top Mortality Patterns\n\n"
     markdown += nice_table(top_causes) + "\n\n"
     markdown += (
@@ -454,14 +454,7 @@ def build_markdown_report(
         "specific, geographically specific, and connected to trusted community "
         "channels.\n\n"
     )
-    markdown += markdown_image_gallery([
-        "Demographics Pie Dashboard - Sex.png",
-        "Demographics Pie Dashboard - Race.png",
-        "Top Causes Pie Dashboard.png",
-        "NCHS Pie Dashboard - Sex.png",
-        "NCHS Pie Dashboard - Race.png",
-        "NCHS Pie Dashboard - Top Causes.png",
-    ])
+    markdown += "_Embedded HTML report uses OASIS-only visuals for consistency; demographic metrics remain available in the tables._\n"
     markdown += (
         "\n**Connection to the next section:** demographics alone do not explain why "
         "health outcomes differ. To understand the pattern more deeply, the next "
@@ -480,10 +473,8 @@ def build_markdown_report(
         "intervention rather than broad outreach.\n\n"
     )
     markdown += markdown_image_gallery([
-        "Education Heatmap - *.png",
-        "SES Heatmap - *.png",
-        "*Mortality Ranking - Race and Education.png",
-        "*Mortality Ranking - Race and SES.png",
+        "Education Heatmap - *OASIS* - *.png",
+        "SES Heatmap - *OASIS* - *.png",
     ])
     markdown += "\n### Social Determinants Patterns\n\n"
     markdown += nice_table(top_social) + "\n\n"
@@ -607,29 +598,33 @@ def build_html_report(
         forecast_table = forecast_summary.get("forecast")
         opportunity_table = forecast_summary.get("opportunity")
 
+    # Keep report visualizations focused on one mortality data source: OASIS.
+    # The tables/metrics still use all available sources, but the embedded visuals
+    # stay cleaner and less repetitive for judges.
     health_burden_charts = interactive_gallery(
-        html_patterns=["Health Burden Heatmap - *.html"],
-        png_patterns=["Health Burden Heatmap - *.png"],
+        html_patterns=["Health Burden Heatmap - *OASIS* - *.html"],
+        png_patterns=["Health Burden Heatmap - *OASIS* - *.png"],
     )
 
-    demographic_charts = image_gallery([
-        "Demographics Pie Dashboard - Sex.png",
-        "Demographics Pie Dashboard - Race.png",
-        "Top Causes Pie Dashboard.png",
-        "NCHS Pie Dashboard - Sex.png",
-        "NCHS Pie Dashboard - Race.png",
-        "NCHS Pie Dashboard - Top Causes.png",
-    ])
+    oasis_sunburst_charts = interactive_gallery(
+        html_patterns=["*OASIS*Sunburst - Disease Age.html"],
+        png_patterns=None,
+    )
+
+    demographic_charts = ""
 
     social_heatmaps = interactive_gallery(
-        html_patterns=["Education Heatmap - *.html", "SES Heatmap - *.html"],
-        png_patterns=["Education Heatmap - *.png", "SES Heatmap - *.png"],
+        html_patterns=[
+            "Education Heatmap - *OASIS* - *.html",
+            "SES Heatmap - *OASIS* - *.html",
+        ],
+        png_patterns=[
+            "Education Heatmap - *OASIS* - *.png",
+            "SES Heatmap - *OASIS* - *.png",
+        ],
     )
 
-    social_rankings = image_gallery([
-        "*Mortality Ranking - Race and Education.png",
-        "*Mortality Ranking - Race and SES.png",
-    ])
+    social_rankings = ""
 
     market_charts = image_gallery([
         "Aetna Enrollment by County.png",
@@ -803,7 +798,7 @@ def build_html_report(
 
     iframe {
         width: 100%;
-        height: 720px;
+        height: 880px;
         border: 1px solid var(--coral-light);
         border-radius: 10px;
         background: white;
@@ -1020,10 +1015,11 @@ the first time, explains the finding, and connects that finding to the next part
 
 <h2>1. Community Health Burden</h2>
 <p>
-The first set of diagrams identifies the leading causes of death in Fulton and DeKalb Counties. These heatmaps answer a
-simple question: which conditions account for the largest share of deaths in each county and data source? The rows list
-causes of death. The values show the share of deaths or death burden represented by each cause. Darker cells indicate a
-larger burden.
+The first set of diagrams uses OASIS visuals to identify the leading causes of death in Fulton and DeKalb Counties.
+The tables still summarize all available sources, but the visual story is kept to OASIS so the report stays focused and
+easy to follow. These heatmaps answer a simple question: which conditions account for the largest share of deaths in each
+county? The rows list causes of death. The values show the share of deaths or death burden represented by each cause.
+Darker cells indicate a larger burden.
 </p>
 <p>
 The key finding is that chronic disease is the dominant health burden. Heart disease, stroke, cancer, diabetes, and related
@@ -1033,7 +1029,16 @@ food access, medication adherence, screening, transportation, and consistent pri
 
 {health_burden_charts}
 
-<h3>Top Mortality Patterns</h3>
+<h3>OASIS Disease and Age Sunburst</h3>
+<p>
+The sunburst view adds depth by showing how leading causes of death split across age groups. The center of the chart
+starts with the disease category, and the outer ring shows the age groups connected to that cause. This helps show not
+only what is driving mortality, but which age groups carry the burden.
+</p>
+
+{oasis_sunburst_charts}
+
+<h3>Top Mortality Patterns Across All Sources</h3>
 {df_to_html(top_causes)}
 
 <p class="bridge">
@@ -1054,7 +1059,10 @@ be generic. It should be designed around where people live, how they access care
 partners already serve them.
 </p>
 
-{demographic_charts}
+<p class="note">
+For visual consistency, this report keeps embedded mortality visuals to OASIS. The demographic interpretation is still
+supported by the all-source summary tables produced by the analysis pipeline.
+</p>
 
 <p class="bridge">
 Connection to the next section: demographics alone do not explain why health outcomes differ. To understand the pattern
@@ -1070,16 +1078,14 @@ proxy for long-term access to opportunity, health literacy, employment stability
 healthy food, and medication harder to obtain.
 </p>
 <p>
-The education and SES heatmaps show how deaths are distributed across causes within each social category. Rows represent
-education or SES groups. Columns represent causes of death. Larger numbers and darker cells show where mortality is
-concentrated. The main finding is that high chronic disease burden overlaps with social vulnerability.
+The OASIS education and SES heatmaps show how deaths are distributed across causes within each social category. Rows
+represent education or SES groups. Columns represent causes of death. Larger numbers and darker cells show where mortality
+is concentrated. The main finding is that high chronic disease burden overlaps with social vulnerability.
 </p>
 
 {social_heatmaps}
 
-{social_rankings}
-
-<h3>Social Determinants Patterns</h3>
+<h3>Social Determinants Patterns Across All Sources</h3>
 {df_to_html(top_social)}
 
 <p class="bridge">

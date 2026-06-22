@@ -16,14 +16,6 @@ Each section introduces the diagram type, defines important terms, explains the 
 
 The first set of diagrams identifies the leading causes of death in Fulton and DeKalb Counties. A heatmap is read by comparing the cause labels with the values inside each cell. Darker cells indicate a larger burden. The repeated finding is that chronic disease is central to the health access problem. This matters because chronic conditions are often affected by prevention, food access, medication adherence, screening, transportation, and consistent care.
 
-![Health Burden Heatmap: Georgia Rankable Causes: Department of Public Health (DPH): DeKalb](../png/Health Burden Heatmap - Georgia Rankable Causes - Department of Public Health (DPH) - DeKalb.png)
-
-![Health Burden Heatmap: Georgia Rankable Causes: Department of Public Health (DPH): Fulton](../png/Health Burden Heatmap - Georgia Rankable Causes - Department of Public Health (DPH) - Fulton.png)
-
-![Health Burden Heatmap: National Center for Health Statistics (NCHS): DeKalb](../png/Health Burden Heatmap - National Center for Health Statistics (NCHS) - DeKalb.png)
-
-![Health Burden Heatmap: National Center for Health Statistics (NCHS): Fulton](../png/Health Burden Heatmap - National Center for Health Statistics (NCHS) - Fulton.png)
-
 ![Health Burden Heatmap: Online Analytical Statistical Information System (OASIS): DeKalb](../png/Health Burden Heatmap - Online Analytical Statistical Information System (OASIS) - DeKalb.png)
 
 ![Health Burden Heatmap: Online Analytical Statistical Information System (OASIS): Fulton](../png/Health Burden Heatmap - Online Analytical Statistical Information System (OASIS) - Fulton.png)
@@ -39,11 +31,7 @@ No data available.
 
 The demographic dashboards summarize mortality by sex, race, and cause. A pie chart shows how a whole is divided among categories. These charts are not meant to claim that identity alone causes worse outcomes. They show where the burden is concentrated so outreach can be culturally specific, geographically specific, and connected to trusted community channels.
 
-![Demographics Pie Dashboard: Race](../png/Demographics Pie Dashboard - Race.png)
-
-![Demographics Pie Dashboard: Sex](../png/Demographics Pie Dashboard - Sex.png)
-
-![Top Causes Pie Dashboard](../png/Top Causes Pie Dashboard.png)
+_Embedded HTML report uses OASIS-only visuals for consistency; demographic metrics remain available in the tables._
 
 **Connection to the next section:** demographics alone do not explain why health outcomes differ. To understand the pattern more deeply, the next section looks at education and socioeconomic vulnerability.
 
@@ -51,29 +39,9 @@ The demographic dashboards summarize mortality by sex, race, and cause. A pie ch
 
 Social determinants of health are the non-medical conditions that shape a person's ability to stay healthy. Education level is used as a proxy for long-term access to opportunity, health literacy, employment stability, and navigation of complex health systems. SES vulnerability refers to socioeconomic risk that can make care, transportation, healthy food, and medication harder to obtain. The key finding is that high chronic disease burden overlaps with social vulnerability, which supports a targeted intervention rather than broad outreach.
 
-![Education Heatmap: Georgia Rankable Causes: Department of Public Health (DPH): DeKalb](../png/Education Heatmap - Georgia Rankable Causes - Department of Public Health (DPH) - DeKalb.png)
-
-![Education Heatmap: Georgia Rankable Causes: Department of Public Health (DPH): Fulton](../png/Education Heatmap - Georgia Rankable Causes - Department of Public Health (DPH) - Fulton.png)
-
-![Education Heatmap: National Center for Health Statistics (NCHS): DeKalb](../png/Education Heatmap - National Center for Health Statistics (NCHS) - DeKalb.png)
-
-![Education Heatmap: National Center for Health Statistics (NCHS): Fulton](../png/Education Heatmap - National Center for Health Statistics (NCHS) - Fulton.png)
-
 ![Education Heatmap: Online Analytical Statistical Information System (OASIS): DeKalb](../png/Education Heatmap - Online Analytical Statistical Information System (OASIS) - DeKalb.png)
 
 ![Education Heatmap: Online Analytical Statistical Information System (OASIS): Fulton](../png/Education Heatmap - Online Analytical Statistical Information System (OASIS) - Fulton.png)
-
-![Georgia and OASIS Mortality Ranking: Race and Education](../png/Georgia and OASIS Mortality Ranking - Race and Education.png)
-
-![Georgia and OASIS Mortality Ranking: Race and SES](../png/Georgia and OASIS Mortality Ranking - Race and SES.png)
-
-![SES Heatmap: Georgia Rankable Causes: Department of Public Health (DPH): DeKalb](../png/SES Heatmap - Georgia Rankable Causes - Department of Public Health (DPH) - DeKalb.png)
-
-![SES Heatmap: Georgia Rankable Causes: Department of Public Health (DPH): Fulton](../png/SES Heatmap - Georgia Rankable Causes - Department of Public Health (DPH) - Fulton.png)
-
-![SES Heatmap: National Center for Health Statistics (NCHS): DeKalb](../png/SES Heatmap - National Center for Health Statistics (NCHS) - DeKalb.png)
-
-![SES Heatmap: National Center for Health Statistics (NCHS): Fulton](../png/SES Heatmap - National Center for Health Statistics (NCHS) - Fulton.png)
 
 ![SES Heatmap: Online Analytical Statistical Information System (OASIS): DeKalb](../png/SES Heatmap - Online Analytical Statistical Information System (OASIS) - DeKalb.png)
 
