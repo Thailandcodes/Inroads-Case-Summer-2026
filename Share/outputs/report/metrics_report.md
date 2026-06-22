@@ -1,4 +1,6 @@
-# Atlanta Health EDA Report
+# Project HEART
+
+## A Data-Driven Strategy for Expanding Healthcare Access in Fulton and DeKalb Counties
 
 ## Executive Summary
 
@@ -46,6 +48,8 @@ The first set of diagrams identifies the leading causes of death in Fulton and D
 | Online Analytical Statistical Information System (OASIS)    | Fulton      | Stroke                                                                     |      399 |
 | National Center for Health Statistics (NCHS)                | DeKalb      | Unintentional Injury                                                       |      369 |
 
+**Connection to the next section:** once we know which diseases are causing the most harm, the next question is who is most affected and whether the burden falls evenly across the population.
+
 ## 2. Population Demographics
 
 The demographic dashboards summarize mortality by sex, race, and cause. A pie chart shows how a whole is divided among categories. These charts are not meant to claim that identity alone causes worse outcomes. They show where the burden is concentrated so outreach can be culturally specific, geographically specific, and connected to trusted community channels.
@@ -55,6 +59,9 @@ The demographic dashboards summarize mortality by sex, race, and cause. A pie ch
 ![Demographics Pie Dashboard: Sex](../png/Demographics Pie Dashboard - Sex.png)
 
 ![Top Causes Pie Dashboard](../png/Top Causes Pie Dashboard.png)
+
+**Connection to the next section:** demographics alone do not explain why health outcomes differ. To understand the pattern more deeply, the next section looks at education and socioeconomic vulnerability.
+
 ## 3. Social Determinants of Health
 
 Social determinants of health are the non-medical conditions that shape a person's ability to stay healthy. Education level is used as a proxy for long-term access to opportunity, health literacy, employment stability, and navigation of complex health systems. SES vulnerability refers to socioeconomic risk that can make care, transportation, healthy food, and medication harder to obtain. The key finding is that high chronic disease burden overlaps with social vulnerability, which supports a targeted intervention rather than broad outreach.
@@ -107,6 +114,8 @@ Social determinants of health are the non-medical conditions that shape a person
 | Online Analytical Statistical Information System (OASIS)    | DeKalb      | Educations  | SES Vulnerability   | Races  | All other Diseases of the Nervous System                                   |      668 |
 | Georgia Rankable Causes - Department of Public Health (DPH) | DeKalb      | Educations  | SES Vulnerability   | Races  | Other Nervous System Diseases                                              |      668 |
 
+**Connection to the next section:** communities with high need are also places where CVS and Aetna can create value through prevention and care navigation.
+
 ## 4. Aetna Enrollment and Age 65+ Market Opportunity
 
 The Aetna enrollment analysis compares known Aetna Medicare Advantage enrollment with the broader age 65+ population. The term age 65+ market opportunity means the estimated number of older residents who may be eligible for Medicare-related outreach. Penetration rate compares known Aetna enrollment to the age 65+ population. Remaining opportunity is the difference between the age 65+ population and known enrollment.
@@ -131,6 +140,8 @@ The Aetna enrollment analysis compares known Aetna Medicare Advantage enrollment
 |:---------|---------------------:|-------------------:|-------------------:|------------------------:|
 | DEKALB   |               112767 |               6734 |            5.97161 |                  106033 |
 | FULTON   |               146945 |               9530 |            6.48542 |                  137415 |
+
+**Connection to the next section:** the market opportunity becomes more meaningful when translated into revenue scenarios.
 
 ## 5. CVS Health Care Benefits Forecast
 
@@ -167,13 +178,19 @@ The forecast section connects local outreach to CVS Health's larger Health Care 
 | FULTON   |           0.03 |             4122.45 |                            5391 |           2.22241e+07 |                       22.2241  |
 | FULTON   |           0.05 |             6870.75 |                            5391 |           3.70402e+07 |                       37.0402  |
 
+**Connection to the next section:** the financial case supports the strategic recommendation, but execution must still be targeted, practical, and grounded in community access barriers.
+
 ## 6. Strategic Interpretation
 
 The evidence points to a focused strategy: target communities where chronic disease burden, social vulnerability, and Medicare-age opportunity overlap. A broad campaign would spread resources too thin. A targeted model allows CVS/Aetna to concentrate outreach where the need is strongest and where the business case is measurable. The proposed solution should be framed as preventive access, not just marketing.
 
+**Connection to the next section:** because this strategy is built from real data but still depends on assumptions, the final step is to state the risks and limits clearly.
+
 ## 7. Risks and Limitations
 
 This analysis identifies patterns and priority populations, but it does not prove direct causation. Mortality data shows where death burden is concentrated; it does not by itself prove why each individual death occurred. The market opportunity analysis uses age 65+ population as a proxy for Medicare-age opportunity. The revenue forecast is scenario-based and depends on capture assumptions, competitive response, CMS rules, member retention, and execution quality.
+
+**Connection to the close:** these limitations do not weaken the recommendation; they clarify how CVS should measure results, validate assumptions, and refine the program after launch.
 
 ## 8. References
 
@@ -193,7 +210,3 @@ This analysis identifies patterns and priority populations, but it does not prov
 ## 9. Acknowledgements
 
 This report was developed for the INROADS Summer 2026 Case Competition. We acknowledge the public agencies and organizations whose datasets and reports made this analysis possible, including Georgia DPH, Georgia OASIS, NCHS, CMS, the U.S. Census Bureau, CDC, Fulton County, DeKalb Public Health, USDA ERS, BLS, and CVS public reporting. We also acknowledge the case competition mentors, reviewers, and team members who shaped the project direction and helped connect the analysis to a practical healthcare access solution.
-
-## 10. Interactive Diagram Appendix
-
-Interactive Plotly versions of selected diagrams are generated in the `outputs/html` folder. These files can be opened directly for deeper review or displayed inside the HTML report when the project folder structure is preserved.

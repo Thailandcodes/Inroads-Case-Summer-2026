@@ -65,20 +65,6 @@ def format_number(value):
         return str(value)
 
 
-def format_percent(value):
-    try:
-        return f"{float(value):.1f}%"
-    except Exception:
-        return str(value)
-
-
-def format_money_millions(value):
-    try:
-        return f"${float(value):,.1f}M"
-    except Exception:
-        return str(value)
-
-
 def safe_copy(df):
     if df is None or df.empty:
         return pd.DataFrame()
@@ -101,7 +87,7 @@ def df_to_html(df):
     current = safe_copy(df)
 
     if current.empty:
-        return "<p>No data available.</p>"
+        return "<p class='note'>No data available.</p>"
 
     return current.to_html(
         index=False,
@@ -126,16 +112,16 @@ def caption_from_filename(path):
     return caption
 
 
-def find_images(patterns, max_images=None):
+def find_files(folder, patterns, max_items=None):
     matches = []
 
     for pattern in patterns:
-        exact_path = PNG_DIR / pattern
+        exact_path = folder / pattern
 
         if exact_path.exists():
             matches.append(exact_path)
         else:
-            matches.extend(list(PNG_DIR.glob(pattern)))
+            matches.extend(list(folder.glob(pattern)))
 
     unique = []
     seen = set()
@@ -149,18 +135,18 @@ def find_images(patterns, max_images=None):
 
     unique = sorted(unique, key=lambda p: p.name)
 
-    if max_images is not None:
-        unique = unique[:max_images]
+    if max_items is not None:
+        unique = unique[:max_items]
 
     return unique
 
 
 def image_gallery(patterns, max_images=None):
-    paths = find_images(patterns, max_images=max_images)
+    paths = find_files(PNG_DIR, patterns, max_items=max_images)
 
     if not paths:
         return (
-            "<p class='note'>No chart image was found for this section. "
+            "<p class='note'>No static chart image was found for this section. "
             "Run <code>python main.py</code> to regenerate project outputs.</p>"
         )
 
@@ -172,7 +158,7 @@ def image_gallery(patterns, max_images=None):
 
         html_parts.append(
             f"""
-            <figure>
+            <figure class="figure-card">
                 <img src="{image_src}" alt="{escape(caption)}">
                 <figcaption>{escape(caption)}</figcaption>
             </figure>
@@ -183,8 +169,40 @@ def image_gallery(patterns, max_images=None):
     return "\n".join(html_parts)
 
 
+def interactive_gallery(html_patterns, png_patterns=None, max_items=None):
+    html_paths = find_files(HTML_DIR, html_patterns, max_items=max_items)
+
+    if html_paths:
+        html_parts = ["<div class='interactive-grid'>"]
+
+        for path in html_paths:
+            caption = caption_from_filename(path)
+            relative_path = f"../html/{path.name}"
+
+            html_parts.append(
+                f"""
+                <section class="interactive-card">
+                    <div class="interactive-label">Interactive figure</div>
+                    <h3>{escape(caption)}</h3>
+                    <iframe src="{escape(relative_path)}" loading="lazy"></iframe>
+                </section>
+                """
+            )
+
+        html_parts.append("</div>")
+        return "\n".join(html_parts)
+
+    if png_patterns:
+        return image_gallery(png_patterns, max_images=max_items)
+
+    return (
+        "<p class='note'>No interactive chart was found for this section. "
+        "Run <code>python main.py</code> to regenerate project outputs.</p>"
+    )
+
+
 def markdown_image_gallery(patterns, max_images=None):
-    paths = find_images(patterns, max_images=max_images)
+    paths = find_files(PNG_DIR, patterns, max_items=max_images)
 
     if not paths:
         return "_No chart image was found for this section. Run `python main.py` to regenerate project outputs._\n"
@@ -261,22 +279,22 @@ def build_metric_cards(aetna_summary, market_summary):
     cards = []
 
     if known_enrollment is not None:
-        cards.append(("Known Aetna Enrollment", format_number(known_enrollment)))
+        cards.append(("Known Aetna Enrollment", format_number(known_enrollment), "coral"))
 
     if age_65_population is not None:
-        cards.append(("Age 65+ Population", format_number(age_65_population)))
+        cards.append(("Age 65+ Population", format_number(age_65_population), "gold"))
 
     if remaining_opportunity is not None:
-        cards.append(("Remaining Opportunity", format_number(remaining_opportunity)))
+        cards.append(("Remaining Opportunity", format_number(remaining_opportunity), "rose"))
 
     if not cards:
         return ""
 
     card_html = ""
 
-    for title, value in cards:
+    for title, value, style_name in cards:
         card_html += (
-            "<div class='metric-card'>"
+            f"<div class='metric-card {style_name}'>"
             f"<span>{escape(title)}</span>"
             f"<strong>{escape(value)}</strong>"
             "</div>"
@@ -298,41 +316,6 @@ def reference_list_html():
     return f"<ul class='reference-list'>{items}</ul>"
 
 
-def interactive_section_html():
-    if not HTML_DIR.exists():
-        return (
-            "<p>No interactive files were found. Run <code>python main.py</code> "
-            "to regenerate HTML outputs.</p>"
-        )
-
-    html_files = sorted(HTML_DIR.glob("*.html"), key=lambda p: p.name)
-
-    if not html_files:
-        return (
-            "<p>No interactive files were found. Run <code>python main.py</code> "
-            "to regenerate HTML outputs.</p>"
-        )
-
-    items = ""
-
-    for path in html_files:
-        label = caption_from_filename(path)
-        relative_path = f"../html/{path.name}"
-        items += f"<li><a href='{escape(relative_path)}'>{escape(label)}</a></li>"
-
-    return f"""
-    <p>
-    Interactive Plotly versions of selected diagrams are generated in the
-    <strong>outputs/html</strong> folder. These files can be opened directly
-    for deeper review or displayed inside the HTML report when the project
-    folder structure is preserved.
-    </p>
-    <ul class='reference-list'>
-        {items}
-    </ul>
-    """
-
-
 def build_markdown_report(
     top_causes,
     top_social,
@@ -340,7 +323,8 @@ def build_markdown_report(
     market_summary,
     forecast_summary
 ):
-    markdown = "# Atlanta Health EDA Report\n\n"
+    markdown = "# Project HEART\n\n"
+    markdown += "## A Data-Driven Strategy for Expanding Healthcare Access in Fulton and DeKalb Counties\n\n"
 
     markdown += "## Executive Summary\n\n"
     markdown += (
@@ -352,6 +336,7 @@ def build_markdown_report(
         "barriers that shape whether residents can prevent disease, manage existing "
         "conditions, and receive care early.\n\n"
     )
+
     markdown += (
         "The business implication is that CVS and Aetna can use targeted preventive "
         "care outreach to reach communities with both high health need and measurable "
@@ -386,6 +371,11 @@ def build_markdown_report(
     markdown += markdown_image_gallery(["Health Burden Heatmap - *.png"])
     markdown += "\n### Top Mortality Patterns\n\n"
     markdown += nice_table(top_causes) + "\n\n"
+    markdown += (
+        "**Connection to the next section:** once we know which diseases are causing "
+        "the most harm, the next question is who is most affected and whether the "
+        "burden falls evenly across the population.\n\n"
+    )
 
     markdown += "## 2. Population Demographics\n\n"
     markdown += (
@@ -404,6 +394,11 @@ def build_markdown_report(
         "NCHS Pie Dashboard - Race.png",
         "NCHS Pie Dashboard - Top Causes.png",
     ])
+    markdown += (
+        "\n**Connection to the next section:** demographics alone do not explain why "
+        "health outcomes differ. To understand the pattern more deeply, the next "
+        "section looks at education and socioeconomic vulnerability.\n\n"
+    )
 
     markdown += "## 3. Social Determinants of Health\n\n"
     markdown += (
@@ -424,6 +419,10 @@ def build_markdown_report(
     ])
     markdown += "\n### Social Determinants Patterns\n\n"
     markdown += nice_table(top_social) + "\n\n"
+    markdown += (
+        "**Connection to the next section:** communities with high need are also "
+        "places where CVS and Aetna can create value through prevention and care navigation.\n\n"
+    )
 
     markdown += "## 4. Aetna Enrollment and Age 65+ Market Opportunity\n\n"
     markdown += (
@@ -443,6 +442,10 @@ def build_markdown_report(
     markdown += nice_table(aetna_summary) + "\n\n"
     markdown += "### Age 65+ Market Opportunity\n\n"
     markdown += nice_table(market_summary) + "\n\n"
+    markdown += (
+        "**Connection to the next section:** the market opportunity becomes more "
+        "meaningful when translated into revenue scenarios.\n\n"
+    )
 
     markdown += "## 5. CVS Health Care Benefits Forecast\n\n"
     markdown += (
@@ -467,6 +470,12 @@ def build_markdown_report(
         markdown += "### Potential Aetna Market Opportunity\n\n"
         markdown += nice_table(forecast_summary.get("opportunity")) + "\n\n"
 
+    markdown += (
+        "**Connection to the next section:** the financial case supports the strategic "
+        "recommendation, but execution must still be targeted, practical, and grounded "
+        "in community access barriers.\n\n"
+    )
+
     markdown += "## 6. Strategic Interpretation\n\n"
     markdown += (
         "The evidence points to a focused strategy: target communities where chronic "
@@ -475,6 +484,11 @@ def build_markdown_report(
         "CVS/Aetna to concentrate outreach where the need is strongest and where "
         "the business case is measurable. The proposed solution should be framed "
         "as preventive access, not just marketing.\n\n"
+    )
+    markdown += (
+        "**Connection to the next section:** because this strategy is built from real "
+        "data but still depends on assumptions, the final step is to state the risks "
+        "and limits clearly.\n\n"
     )
 
     markdown += "## 7. Risks and Limitations\n\n"
@@ -485,6 +499,11 @@ def build_markdown_report(
         "opportunity analysis uses age 65+ population as a proxy for Medicare-age "
         "opportunity. The revenue forecast is scenario-based and depends on capture "
         "assumptions, competitive response, CMS rules, member retention, and execution quality.\n\n"
+    )
+    markdown += (
+        "**Connection to the close:** these limitations do not weaken the recommendation; "
+        "they clarify how CVS should measure results, validate assumptions, and refine "
+        "the program after launch.\n\n"
     )
 
     markdown += "## 8. References\n\n"
@@ -498,14 +517,7 @@ def build_markdown_report(
         "NCHS, CMS, the U.S. Census Bureau, CDC, Fulton County, DeKalb Public Health, "
         "USDA ERS, BLS, and CVS public reporting. We also acknowledge the case "
         "competition mentors, reviewers, and team members who shaped the project "
-        "direction and helped connect the analysis to a practical healthcare access solution.\n\n"
-    )
-
-    markdown += "## 10. Interactive Diagram Appendix\n\n"
-    markdown += (
-        "Interactive Plotly versions of selected diagrams are generated in the "
-        "`outputs/html` folder. These files can be opened directly for deeper review "
-        "or displayed inside the HTML report when the project folder structure is preserved.\n"
+        "direction and helped connect the analysis to a practical healthcare access solution.\n"
     )
 
     return markdown
@@ -529,18 +541,58 @@ def build_html_report(
 
     css = """
     <style>
+    :root {
+        --coral: #C7462D;
+        --coral-light: #F3B2A6;
+        --rose: #E87561;
+        --burgundy: #3B0D0C;
+        --muted-red: #8C3B2E;
+        --cream: #fffaf7;
+        --soft-cream: #F9E7E2;
+        --gold: #D6A55C;
+        --gold-light: #FFF3D8;
+        --blue-gray: #EAF1F4;
+        --deep-teal: #315A63;
+        --soft-gray: #F5F2F0;
+    }
+
     body {
         font-family: Arial, sans-serif;
         margin: 0;
-        background: #fffdfc;
-        color: #3B0D0C;
+        background: var(--cream);
+        color: var(--burgundy);
         line-height: 1.6;
     }
 
     header {
-        background: linear-gradient(135deg, #F9E7E2 0%, #ffffff 100%);
-        border-bottom: 8px solid #C7462D;
-        padding: 46px 60px;
+        background:
+            linear-gradient(135deg, rgba(249,231,226,0.95) 0%, rgba(255,250,247,0.96) 55%, rgba(255,243,216,0.85) 100%);
+        border-bottom: 8px solid var(--coral);
+        padding: 52px 64px;
+    }
+
+    header .eyebrow {
+        color: var(--muted-red);
+        font-weight: bold;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 44px;
+        letter-spacing: -0.8px;
+    }
+
+    header h2 {
+        border: 0;
+        color: var(--burgundy);
+        margin: 6px 0 0;
+        padding: 0;
+        font-size: 22px;
+        font-weight: normal;
     }
 
     header p {
@@ -549,27 +601,22 @@ def build_html_report(
         margin-bottom: 0;
     }
 
-    h1 {
-        margin: 0;
-        font-size: 38px;
+    main {
+        max-width: 1240px;
+        margin: auto;
+        padding: 36px 56px 70px;
     }
 
     h2 {
-        color: #C7462D;
-        border-bottom: 2px solid #F3B2A6;
+        color: var(--coral);
+        border-bottom: 2px solid var(--coral-light);
         padding-bottom: 8px;
-        margin-top: 48px;
+        margin-top: 52px;
     }
 
     h3 {
-        color: #8C3B2E;
+        color: var(--muted-red);
         margin-top: 30px;
-    }
-
-    main {
-        max-width: 1220px;
-        margin: auto;
-        padding: 35px 55px 70px;
     }
 
     p {
@@ -577,20 +624,38 @@ def build_html_report(
     }
 
     .callout {
-        background: #F9E7E2;
-        border-left: 7px solid #C7462D;
-        padding: 22px 24px;
-        border-radius: 12px;
-        margin: 22px 0;
+        background: white;
+        border-left: 7px solid var(--coral);
+        padding: 24px 26px;
+        border-radius: 14px;
+        margin: 24px 0;
+        box-shadow: 0 8px 22px rgba(59, 13, 12, 0.06);
+    }
+
+    .gold-callout {
+        background: var(--gold-light);
+        border-left: 7px solid var(--gold);
+    }
+
+    .blue-callout {
+        background: var(--blue-gray);
+        border-left: 7px solid var(--deep-teal);
+    }
+
+    .risk-callout {
+        background: var(--soft-gray);
+        border-left: 7px solid var(--muted-red);
     }
 
     .bridge {
         background: #fff8f5;
-        border: 1px solid #F3B2A6;
+        border: 1px solid var(--coral-light);
+        border-left: 7px solid var(--gold);
         padding: 16px 18px;
         border-radius: 10px;
-        color: #8C3B2E;
+        color: var(--muted-red);
         font-weight: bold;
+        margin-top: 22px;
     }
 
     .grid {
@@ -600,13 +665,49 @@ def build_html_report(
         margin: 22px 0 34px;
     }
 
-    figure {
+    .interactive-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 26px;
+        margin: 24px 0 34px;
+    }
+
+    .figure-card,
+    .interactive-card {
         background: white;
-        border: 1px solid #F3B2A6;
-        border-radius: 12px;
-        padding: 12px;
+        border: 1px solid var(--coral-light);
+        border-radius: 14px;
+        padding: 14px;
         margin: 0;
         box-shadow: 0 6px 16px rgba(59, 13, 12, 0.06);
+    }
+
+    .interactive-card {
+        border-top: 6px solid var(--deep-teal);
+    }
+
+    .interactive-label {
+        display: inline-block;
+        background: var(--blue-gray);
+        color: var(--deep-teal);
+        font-weight: bold;
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .interactive-card h3 {
+        margin-top: 10px;
+    }
+
+    iframe {
+        width: 100%;
+        height: 720px;
+        border: 1px solid var(--coral-light);
+        border-radius: 10px;
+        background: white;
     }
 
     img {
@@ -616,7 +717,7 @@ def build_html_report(
 
     figcaption {
         margin-top: 10px;
-        color: #8C3B2E;
+        color: var(--muted-red);
         font-size: 13px;
     }
 
@@ -629,15 +730,27 @@ def build_html_report(
 
     .metric-card {
         background: white;
-        border: 1px solid #F3B2A6;
-        border-top: 6px solid #C7462D;
-        border-radius: 12px;
+        border: 1px solid var(--coral-light);
+        border-radius: 14px;
         padding: 18px;
+        box-shadow: 0 6px 16px rgba(59, 13, 12, 0.05);
+    }
+
+    .metric-card.coral {
+        border-top: 6px solid var(--coral);
+    }
+
+    .metric-card.gold {
+        border-top: 6px solid var(--gold);
+    }
+
+    .metric-card.rose {
+        border-top: 6px solid var(--rose);
     }
 
     .metric-card span {
         display: block;
-        color: #8C3B2E;
+        color: var(--muted-red);
         font-size: 13px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -645,8 +758,29 @@ def build_html_report(
 
     .metric-card strong {
         display: block;
-        font-size: 26px;
+        font-size: 28px;
         margin-top: 6px;
+    }
+
+    .definition-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+        margin: 22px 0;
+    }
+
+    .definition-card {
+        background: white;
+        border: 1px solid var(--blue-gray);
+        border-top: 5px solid var(--deep-teal);
+        border-radius: 12px;
+        padding: 14px;
+    }
+
+    .definition-card strong {
+        color: var(--deep-teal);
+        display: block;
+        margin-bottom: 6px;
     }
 
     .data-table {
@@ -655,10 +789,11 @@ def build_html_report(
         font-size: 13px;
         margin: 16px 0 30px;
         background: white;
+        box-shadow: 0 4px 12px rgba(59, 13, 12, 0.04);
     }
 
     .data-table th {
-        background: #C7462D;
+        background: var(--coral);
         color: white;
         padding: 9px;
         text-align: left;
@@ -666,11 +801,11 @@ def build_html_report(
 
     .data-table td {
         padding: 8px;
-        border-bottom: 1px solid #F3B2A6;
+        border-bottom: 1px solid var(--coral-light);
     }
 
     .note {
-        color: #8C3B2E;
+        color: var(--muted-red);
         font-size: 14px;
     }
 
@@ -679,9 +814,17 @@ def build_html_report(
     }
 
     code {
-        background: #F9E7E2;
+        background: var(--soft-cream);
         padding: 2px 5px;
         border-radius: 4px;
+    }
+
+    footer {
+        margin-top: 56px;
+        padding-top: 22px;
+        border-top: 2px solid var(--coral-light);
+        color: var(--muted-red);
+        font-size: 13px;
     }
 
     @media print {
@@ -693,8 +836,14 @@ def build_html_report(
             padding: 20px;
         }
 
-        .grid, .metric-grid {
+        .grid,
+        .metric-grid,
+        .definition-grid {
             grid-template-columns: 1fr;
+        }
+
+        iframe {
+            display: none;
         }
     }
     </style>
@@ -705,16 +854,18 @@ def build_html_report(
 <html>
 <head>
 <meta charset="utf-8">
-<title>Atlanta Health EDA Report</title>
+<title>Project HEART Report</title>
 {css}
 </head>
 
 <body>
 <header>
-<h1>Atlanta Health EDA Report</h1>
+<div class="eyebrow">INROADS Summer 2026 Case Competition</div>
+<h1>Project HEART</h1>
+<h2>A Data-Driven Strategy for Expanding Healthcare Access in Fulton and DeKalb Counties</h2>
 <p>
-Connecting Fulton and DeKalb community health burden, social determinants,
-Medicare-age opportunity, and CVS/Aetna growth strategy.
+A digital case report connecting community health burden, social determinants, Medicare-age opportunity,
+and CVS/Aetna growth strategy.
 </p>
 </header>
 
@@ -744,12 +895,28 @@ while supporting future member growth and retention.
 This report is organized like a presentation. Each section introduces the diagram type, defines the terms that appear for
 the first time, explains the finding, and connects that finding to the next part of the analysis.
 </p>
+
+<div class="definition-grid">
+    <div class="definition-card">
+        <strong>Rankable Causes</strong>
+        Causes of death that can be compared across categories to identify the largest mortality burden.
+    </div>
+    <div class="definition-card">
+        <strong>Heatmap</strong>
+        A chart where darker shading signals a larger value or greater burden.
+    </div>
+    <div class="definition-card">
+        <strong>SES Vulnerability</strong>
+        Socioeconomic risk that can make care, food, medication, or transportation harder to access.
+    </div>
+    <div class="definition-card">
+        <strong>Penetration Rate</strong>
+        Known Aetna enrollment compared with the broader age 65+ population.
+    </div>
+</div>
+
 <p>
-<strong>Rankable causes of death</strong> are causes that can be compared across categories to identify which conditions create
-the largest mortality burden. <strong>Deaths</strong> are counts, while <strong>percent of deaths</strong> shows each cause's share of all deaths
-within the selected source and county. <strong>Heatmaps</strong> use darker shading to show larger values. In this report, darker red
-generally means a greater burden. <strong>NCHS</strong> is kept separate from Georgia and OASIS because the source structure and cause
-groupings are not directly comparable.
+<strong>NCHS</strong> is kept separate from Georgia and OASIS because the source structure and cause groupings are not directly comparable.
 </p>
 
 <h2>1. Community Health Burden</h2>
@@ -765,15 +932,18 @@ chronic conditions repeatedly appear near the top. This matters because chronic 
 food access, medication adherence, screening, transportation, and consistent primary care.
 </p>
 
-{image_gallery(["Health Burden Heatmap - *.png"])}
+{interactive_gallery(
+    html_patterns=["Health Burden Heatmap - *.html"],
+    png_patterns=["Health Burden Heatmap - *.png"]
+)}
+
+<h3>Top Mortality Patterns</h3>
+{df_to_html(top_causes)}
 
 <p class="bridge">
 Connection to the next section: once we know which diseases are causing the most harm, the next question is who is most
 affected and whether the burden falls evenly across the population.
 </p>
-
-<h3>Top Mortality Patterns</h3>
-{df_to_html(top_causes)}
 
 <h2>2. Population Demographics</h2>
 <p>
@@ -816,20 +986,23 @@ education or SES groups. Columns represent causes of death. Larger numbers and d
 concentrated. The main finding is that high chronic disease burden overlaps with social vulnerability.
 </p>
 
+{interactive_gallery(
+    html_patterns=["Education Heatmap - *.html", "SES Heatmap - *.html"],
+    png_patterns=["Education Heatmap - *.png", "SES Heatmap - *.png"]
+)}
+
 {image_gallery([
-    "Education Heatmap - *.png",
-    "SES Heatmap - *.png",
     "*Mortality Ranking - Race and Education.png",
     "*Mortality Ranking - Race and SES.png",
 ])}
+
+<h3>Social Determinants Patterns</h3>
+{df_to_html(top_social)}
 
 <p class="bridge">
 Connection to the next section: communities with high need are also places where CVS and Aetna can create value through
 prevention and care navigation.
 </p>
-
-<h3>Social Determinants Patterns</h3>
-{df_to_html(top_social)}
 
 <h2>4. Aetna Enrollment and Age 65+ Market Opportunity</h2>
 <p>
@@ -850,15 +1023,15 @@ opportunity</strong> is the difference between the age 65+ population and known 
     "Aetna Age 65 Penetration Dashboard.png",
 ])}
 
-<p class="bridge">
-Connection to the next section: the market opportunity becomes more meaningful when translated into revenue scenarios.
-</p>
-
 <h3>Aetna Enrollment</h3>
 {df_to_html(aetna_summary)}
 
 <h3>Age 65+ Market Opportunity</h3>
 {df_to_html(market_summary)}
+
+<p class="bridge">
+Connection to the next section: the market opportunity becomes more meaningful when translated into revenue scenarios.
+</p>
 
 <h2>5. CVS Health Care Benefits Forecast</h2>
 <p>
@@ -885,8 +1058,13 @@ strengthen the value of the plan relationship.
 <h3>Potential Aetna Market Opportunity</h3>
 {df_to_html(opportunity_table)}
 
+<p class="bridge">
+Connection to the next section: the financial case supports the strategic recommendation, but execution must still be
+targeted, practical, and grounded in community access barriers.
+</p>
+
 <h2>6. Strategic Interpretation</h2>
-<div class="callout">
+<div class="callout gold-callout">
 <p>
 The evidence points to a focused strategy: target communities where chronic disease burden, social vulnerability, and
 Medicare-age opportunity overlap. A broad campaign would spread resources too thin. A targeted model allows CVS/Aetna to
@@ -900,7 +1078,13 @@ daily access to food, medication, transportation, and consistent care.
 </p>
 </div>
 
+<p class="bridge">
+Connection to the next section: because this strategy is built from real data but still depends on assumptions, the final
+step is to state the risks and limits clearly.
+</p>
+
 <h2>7. Risks and Limitations</h2>
+<div class="callout risk-callout">
 <p>
 This analysis identifies patterns and priority populations, but it does not prove direct causation. Mortality data shows
 where death burden is concentrated; it does not by itself prove why each individual death occurred. Education and SES
@@ -911,6 +1095,12 @@ The market opportunity analysis uses age 65+ population as a proxy for Medicare-
 be enrolled in non-Aetna plans, may not be eligible for a specific product, or may not be reachable through the proposed
 channels. The revenue forecast is scenario-based and depends on capture assumptions, revenue-per-member assumptions,
 competitive response, CMS rules, member retention, and execution quality.
+</p>
+</div>
+
+<p class="bridge">
+Connection to the close: these limitations do not weaken the recommendation; they clarify how CVS should measure results,
+validate assumptions, and refine the program after launch.
 </p>
 
 <h2>8. References</h2>
@@ -925,8 +1115,9 @@ competition mentors, reviewers, and team members who shaped the project directio
 practical healthcare access solution.
 </p>
 
-<h2>10. Interactive Diagram Appendix</h2>
-{interactive_section_html()}
+<footer>
+Project HEART digital case report. Generated from Python outputs in <code>outputs/png</code>, <code>outputs/html</code>, and <code>outputs/csv</code>.
+</footer>
 
 </main>
 </body>
@@ -947,7 +1138,6 @@ def generate_metrics_report(
 ):
     md_path = REPORT_DIR / "metrics_report.md"
     html_path = REPORT_DIR / "metrics_report.html"
-    pdf_path = REPORT_DIR / "metrics_report.pdf"
 
     top_causes = top_rows(
         cause_data,
@@ -980,19 +1170,12 @@ def generate_metrics_report(
     md_path.write_text(markdown, encoding="utf-8")
     html_path.write_text(html, encoding="utf-8")
 
-    try:
-        from weasyprint import HTML
-        HTML(filename=str(html_path)).write_pdf(str(pdf_path))
-        print(f"PDF report created: {pdf_path}")
-    except Exception as error:
-        print("PDF report not created. Install WeasyPrint or open the HTML report and print/save as PDF.")
-        print(f"PDF error: {error}")
-
     print(f"Markdown report created: {md_path}")
     print(f"HTML report created: {html_path}")
+    print("PDF report skipped by design. Use the HTML report as the final digital case report.")
 
     return {
         "markdown": md_path,
         "html": html_path,
-        "pdf": pdf_path if pdf_path.exists() else None
+        "pdf": None
     }
