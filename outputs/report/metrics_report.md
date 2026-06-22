@@ -30,23 +30,8 @@ The first set of diagrams identifies the leading causes of death in Fulton and D
 
 ### Top Mortality Patterns
 
-| Source                                                      | Geography   | Cause                                                                      |   Deaths |
-|:------------------------------------------------------------|:------------|:---------------------------------------------------------------------------|---------:|
-| National Center for Health Statistics (NCHS)                | Fulton      | Cancer                                                                     |     1409 |
-| National Center for Health Statistics (NCHS)                | Fulton      | Heart Disease                                                              |     1369 |
-| National Center for Health Statistics (NCHS)                | DeKalb      | Cancer                                                                     |     1086 |
-| National Center for Health Statistics (NCHS)                | DeKalb      | Heart Disease                                                              |     1070 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Heart Disease                                                              |      492 |
-| National Center for Health Statistics (NCHS)                | Fulton      | Unintentional Injury                                                       |      480 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Essential (Primary) Hypertension and Hypertensive Renal, and Heart Disease |      456 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Other Nervous System Diseases                                              |      455 |
-| Online Analytical Statistical Information System (OASIS)    | Fulton      | All other Diseases of the Nervous System                                   |      455 |
-| Online Analytical Statistical Information System (OASIS)    | Fulton      | Obstructive Heart Disease (incl. Heart Attack)                             |      428 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Stroke                                                                     |      399 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | DeKalb      | Heart Disease                                                              |      399 |
-| National Center for Health Statistics (NCHS)                | Fulton      | Cerebrovascular Diseases                                                   |      399 |
-| Online Analytical Statistical Information System (OASIS)    | Fulton      | Stroke                                                                     |      399 |
-| National Center for Health Statistics (NCHS)                | DeKalb      | Unintentional Injury                                                       |      369 |
+No data available.
+
 
 **Connection to the next section:** once we know which diseases are causing the most harm, the next question is who is most affected and whether the burden falls evenly across the population.
 
@@ -96,23 +81,23 @@ Social determinants of health are the non-medical conditions that shape a person
 
 ### Social Determinants Patterns
 
-| Source                                                      | Geography   | Education   | SES Vulnerability   | Race   | Cause                                                                      |   Deaths |
-|:------------------------------------------------------------|:------------|:------------|:--------------------|:-------|:---------------------------------------------------------------------------|---------:|
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Educations  | SES Vulnerability   | Races  | Heart Disease                                                              |      930 |
-| Online Analytical Statistical Information System (OASIS)    | Fulton      | Educations  | SES Vulnerability   | Races  | All other Diseases of the Nervous System                                   |      892 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Educations  | SES Vulnerability   | Races  | Other Nervous System Diseases                                              |      892 |
-| National Center for Health Statistics (NCHS)                | Fulton      | Educations  | SES Vulnerability   | Races  | All other Diseases of the Nervous System                                   |      892 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Educations  | SES Vulnerability   | Races  | Essential (Primary) Hypertension and Hypertensive Renal, and Heart Disease |      886 |
-| National Center for Health Statistics (NCHS)                | Fulton      | Educations  | SES Vulnerability   | Races  | Obstructive Heart Disease (incl. Heart Attack)                             |      812 |
-| Online Analytical Statistical Information System (OASIS)    | Fulton      | Educations  | SES Vulnerability   | Races  | Obstructive Heart Disease (incl. Heart Attack)                             |      812 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | DeKalb      | Educations  | SES Vulnerability   | Races  | Heart Disease                                                              |      774 |
-| Online Analytical Statistical Information System (OASIS)    | Fulton      | Educations  | SES Vulnerability   | Races  | Stroke                                                                     |      764 |
-| National Center for Health Statistics (NCHS)                | Fulton      | Educations  | SES Vulnerability   | Races  | Stroke                                                                     |      764 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Educations  | SES Vulnerability   | Races  | Stroke                                                                     |      764 |
-| Online Analytical Statistical Information System (OASIS)    | DeKalb      | Educations  | SES Vulnerability   | Races  | Obstructive Heart Disease (incl. Heart Attack)                             |      698 |
-| National Center for Health Statistics (NCHS)                | DeKalb      | Educations  | SES Vulnerability   | Races  | Obstructive Heart Disease (incl. Heart Attack)                             |      698 |
-| Online Analytical Statistical Information System (OASIS)    | DeKalb      | Educations  | SES Vulnerability   | Races  | All other Diseases of the Nervous System                                   |      668 |
-| Georgia Rankable Causes - Department of Public Health (DPH) | DeKalb      | Educations  | SES Vulnerability   | Races  | Other Nervous System Diseases                                              |      668 |
+| Source                                                      | Geography   | Education                       | SES Vulnerability   | Race                      | Cause                                                                      |   Deaths |
+|:------------------------------------------------------------|:------------|:--------------------------------|:--------------------|:--------------------------|:---------------------------------------------------------------------------|---------:|
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Some College or Higher          | Very Low            | White                     | All other Diseases of the Nervous System                                   |      214 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Some College or Higher          | Very Low            | White                     | Other Nervous System Diseases                                              |      214 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Some College or Higher          | Very Low            | White                     | All other Diseases of the Nervous System                                   |      214 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Some College or Higher          | Very Low            | White                     | Heart Disease                                                              |      152 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Some College or Higher          | Very Low            | White                     | Alzheimers Disease                                                         |      136 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Some College or Higher          | Very Low            | White                     | Alzheimer's                                                                |      136 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Some College or Higher          | Very Low            | White                     | Alzheimer's                                                                |      136 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | High School Diploma or GED (12) | Very High           | Black or African-American | Essential (Primary) Hypertension and Hypertensive Renal, and Heart Disease |      134 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Some College or Higher          | Very Low            | White                     | Obstructive Heart Disease (incl. Heart Attack)                             |      130 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Some College or Higher          | Very Low            | White                     | Obstructive Heart Disease (incl. Heart Attack)                             |      130 |
+| National Center for Health Statistics (NCHS)                | Fulton      | Some College or Higher          | Very Low            | White                     | Stroke                                                                     |      128 |
+| Georgia Rankable Causes - Department of Public Health (DPH) | Fulton      | Some College or Higher          | Very Low            | White                     | Stroke                                                                     |      128 |
+| Online Analytical Statistical Information System (OASIS)    | Fulton      | Some College or Higher          | Very Low            | White                     | Stroke                                                                     |      128 |
+| Online Analytical Statistical Information System (OASIS)    | DeKalb      | Some College or Higher          | Very Low            | White                     | All other Diseases of the Nervous System                                   |      118 |
+| National Center for Health Statistics (NCHS)                | DeKalb      | Some College or Higher          | Very Low            | White                     | All other Diseases of the Nervous System                                   |      118 |
 
 **Connection to the next section:** communities with high need are also places where CVS and Aetna can create value through prevention and care navigation.
 

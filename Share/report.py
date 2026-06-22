@@ -48,7 +48,6 @@ def clean_label(value):
     value = str(value)
     value = value.replace("_", " ")
     value = value.replace("Selected ", "")
-    value = value.replace("Total", "")
     value = value.replace("  ", " ")
     return value.strip()
 
@@ -69,6 +68,50 @@ def safe_copy(df):
     if df is None or df.empty:
         return pd.DataFrame()
     return df.copy()
+
+
+def is_total_category(value):
+    if pd.isna(value):
+        return False
+
+    text = str(value).strip().lower()
+    text = text.replace("_", " ")
+    text = " ".join(text.split())
+
+    total_markers = [
+        "selected educations total",
+        "selected education total",
+        "selected ses vulnerability total",
+        "selected races total",
+        "selected race total",
+        "education total",
+        "educations total",
+        "ses vulnerability total",
+        "race total",
+        "races total",
+        "total",
+    ]
+
+    return text in total_markers or text.endswith(" total")
+
+
+def remove_total_category_rows(df):
+    current = safe_copy(df)
+
+    if current.empty:
+        return current
+
+    columns_to_check = [
+        "Education",
+        "SES Vulnerability",
+        "Race",
+    ]
+
+    for col in columns_to_check:
+        if col in current.columns:
+            current = current[~current[col].apply(is_total_category)]
+
+    return current
 
 
 def nice_table(df):
@@ -223,14 +266,28 @@ def top_rows(df, cols, n=10):
     if current.empty or "Deaths" not in current.columns:
         return pd.DataFrame()
 
+    current = remove_total_category_rows(current)
+
+    if current.empty:
+        return pd.DataFrame()
+
     current["Deaths"] = pd.to_numeric(current["Deaths"], errors="coerce")
     current = current.dropna(subset=["Deaths"])
 
     if current.empty:
         return pd.DataFrame()
 
+    usable_cols = []
+
+    for col in cols:
+        if col in current.columns:
+            usable_cols.append(col)
+
+    if not usable_cols:
+        return pd.DataFrame()
+
     summary = (
-        current.groupby(cols, as_index=False)["Deaths"]
+        current.groupby(usable_cols, as_index=False)["Deaths"]
         .sum()
         .sort_values("Deaths", ascending=False)
         .head(n)
@@ -539,6 +596,42 @@ def build_html_report(
         forecast_table = forecast_summary.get("forecast")
         opportunity_table = forecast_summary.get("opportunity")
 
+    health_burden_charts = interactive_gallery(
+        html_patterns=["Health Burden Heatmap - *.html"],
+        png_patterns=["Health Burden Heatmap - *.png"]
+    )
+
+    demographic_charts = image_gallery([
+        "Demographics Pie Dashboard - Sex.png",
+        "Demographics Pie Dashboard - Race.png",
+        "Top Causes Pie Dashboard.png",
+        "NCHS Pie Dashboard - Sex.png",
+        "NCHS Pie Dashboard - Race.png",
+        "NCHS Pie Dashboard - Top Causes.png",
+    ])
+
+    social_heatmaps = interactive_gallery(
+        html_patterns=["Education Heatmap - *.html", "SES Heatmap - *.html"],
+        png_patterns=["Education Heatmap - *.png", "SES Heatmap - *.png"]
+    )
+
+    social_rankings = image_gallery([
+        "*Mortality Ranking - Race and Education.png",
+        "*Mortality Ranking - Race and SES.png",
+    ])
+
+    market_charts = image_gallery([
+        "Aetna Enrollment by County.png",
+        "Market Opportunity Dashboard.png",
+        "Aetna Age 65 Penetration Dashboard.png",
+    ])
+
+    forecast_charts = image_gallery([
+        "CVS Health Care Benefits Revenue.png",
+        "CVS Revenue Forecast Scenarios.png",
+        "Aetna Market Opportunity Revenue.png",
+    ])
+
     css = """
     <style>
     :root {
@@ -635,11 +728,6 @@ def build_html_report(
     .gold-callout {
         background: var(--gold-light);
         border-left: 7px solid var(--gold);
-    }
-
-    .blue-callout {
-        background: var(--blue-gray);
-        border-left: 7px solid var(--deep-teal);
     }
 
     .risk-callout {
@@ -932,10 +1020,7 @@ chronic conditions repeatedly appear near the top. This matters because chronic 
 food access, medication adherence, screening, transportation, and consistent primary care.
 </p>
 
-{interactive_gallery(
-    html_patterns=["Health Burden Heatmap - *.html"],
-    png_patterns=["Health Burden Heatmap - *.png"]
-)}
+{health_burden_charts}
 
 <h3>Top Mortality Patterns</h3>
 {df_to_html(top_causes)}
@@ -958,14 +1043,7 @@ be generic. It should be designed around where people live, how they access care
 partners already serve them.
 </p>
 
-{image_gallery([
-    "Demographics Pie Dashboard - Sex.png",
-    "Demographics Pie Dashboard - Race.png",
-    "Top Causes Pie Dashboard.png",
-    "NCHS Pie Dashboard - Sex.png",
-    "NCHS Pie Dashboard - Race.png",
-    "NCHS Pie Dashboard - Top Causes.png",
-])}
+{demographic_charts}
 
 <p class="bridge">
 Connection to the next section: demographics alone do not explain why health outcomes differ. To understand the pattern
@@ -986,15 +1064,9 @@ education or SES groups. Columns represent causes of death. Larger numbers and d
 concentrated. The main finding is that high chronic disease burden overlaps with social vulnerability.
 </p>
 
-{interactive_gallery(
-    html_patterns=["Education Heatmap - *.html", "SES Heatmap - *.html"],
-    png_patterns=["Education Heatmap - *.png", "SES Heatmap - *.png"]
-)}
+{social_heatmaps}
 
-{image_gallery([
-    "*Mortality Ranking - Race and Education.png",
-    "*Mortality Ranking - Race and SES.png",
-])}
+{social_rankings}
 
 <h3>Social Determinants Patterns</h3>
 {df_to_html(top_social)}
@@ -1017,11 +1089,7 @@ may be more room for growth, while a higher rate suggests Aetna already has a st
 opportunity</strong> is the difference between the age 65+ population and known enrollment.
 </p>
 
-{image_gallery([
-    "Aetna Enrollment by County.png",
-    "Market Opportunity Dashboard.png",
-    "Aetna Age 65 Penetration Dashboard.png",
-])}
+{market_charts}
 
 <h3>Aetna Enrollment</h3>
 {df_to_html(aetna_summary)}
@@ -1046,11 +1114,7 @@ an <strong>engagement driver</strong> because better preventive care can improve
 strengthen the value of the plan relationship.
 </p>
 
-{image_gallery([
-    "CVS Health Care Benefits Revenue.png",
-    "CVS Revenue Forecast Scenarios.png",
-    "Aetna Market Opportunity Revenue.png",
-])}
+{forecast_charts}
 
 <h3>CVS Forecast</h3>
 {df_to_html(forecast_table)}
@@ -1179,3 +1243,4 @@ def generate_metrics_report(
         "html": html_path,
         "pdf": None
     }
+
