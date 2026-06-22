@@ -136,7 +136,7 @@ def df_to_html(df):
         index=False,
         classes="data-table",
         border=0,
-        escape=True
+        escape=True,
     )
 
 
@@ -212,6 +212,17 @@ def image_gallery(patterns, max_images=None):
     return "\n".join(html_parts)
 
 
+def html_file_as_srcdoc(path):
+    try:
+        raw_html = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        raw_html = path.read_text(encoding="latin-1")
+
+    # Embed the full Plotly HTML directly inside the report instead of linking to it.
+    # This makes the final metrics_report.html behave more like an R Markdown HTML output.
+    return escape(raw_html, quote=True)
+
+
 def interactive_gallery(html_patterns, png_patterns=None, max_items=None):
     html_paths = find_files(HTML_DIR, html_patterns, max_items=max_items)
 
@@ -220,14 +231,14 @@ def interactive_gallery(html_patterns, png_patterns=None, max_items=None):
 
         for path in html_paths:
             caption = caption_from_filename(path)
-            relative_path = f"../html/{path.name}"
+            srcdoc_html = html_file_as_srcdoc(path)
 
             html_parts.append(
                 f"""
                 <section class="interactive-card">
-                    <div class="interactive-label">Interactive figure</div>
+                    <div class="interactive-label">Interactive figure embedded in report</div>
                     <h3>{escape(caption)}</h3>
-                    <iframe src="{escape(relative_path)}" loading="lazy"></iframe>
+                    <iframe srcdoc="{srcdoc_html}" loading="lazy"></iframe>
                 </section>
                 """
             )
@@ -378,7 +389,7 @@ def build_markdown_report(
     top_social,
     aetna_summary,
     market_summary,
-    forecast_summary
+    forecast_summary,
 ):
     markdown = "# Project HEART\n\n"
     markdown += "## A Data-Driven Strategy for Expanding Healthcare Access in Fulton and DeKalb Counties\n\n"
@@ -585,7 +596,7 @@ def build_html_report(
     top_social,
     aetna_summary,
     market_summary,
-    forecast_summary
+    forecast_summary,
 ):
     metric_cards = build_metric_cards(aetna_summary, market_summary)
 
@@ -598,7 +609,7 @@ def build_html_report(
 
     health_burden_charts = interactive_gallery(
         html_patterns=["Health Burden Heatmap - *.html"],
-        png_patterns=["Health Burden Heatmap - *.png"]
+        png_patterns=["Health Burden Heatmap - *.png"],
     )
 
     demographic_charts = image_gallery([
@@ -612,7 +623,7 @@ def build_html_report(
 
     social_heatmaps = interactive_gallery(
         html_patterns=["Education Heatmap - *.html", "SES Heatmap - *.html"],
-        png_patterns=["Education Heatmap - *.png", "SES Heatmap - *.png"]
+        png_patterns=["Education Heatmap - *.png", "SES Heatmap - *.png"],
     )
 
     social_rankings = image_gallery([
@@ -1180,7 +1191,7 @@ practical healthcare access solution.
 </p>
 
 <footer>
-Project HEART digital case report. Generated from Python outputs in <code>outputs/png</code>, <code>outputs/html</code>, and <code>outputs/csv</code>.
+Project HEART digital case report. Generated from Python outputs. Interactive charts are embedded directly into this HTML report.
 </footer>
 
 </main>
@@ -1198,7 +1209,7 @@ def generate_metrics_report(
     social_data,
     aetna_summary=None,
     market_summary=None,
-    forecast_summary=None
+    forecast_summary=None,
 ):
     md_path = REPORT_DIR / "metrics_report.md"
     html_path = REPORT_DIR / "metrics_report.html"
@@ -1206,13 +1217,13 @@ def generate_metrics_report(
     top_causes = top_rows(
         cause_data,
         ["Source", "Geography", "Cause"],
-        n=15
+        n=15,
     )
 
     top_social = top_rows(
         social_data,
         ["Source", "Geography", "Education", "SES Vulnerability", "Race", "Cause"],
-        n=15
+        n=15,
     )
 
     markdown = build_markdown_report(
@@ -1220,7 +1231,7 @@ def generate_metrics_report(
         top_social=top_social,
         aetna_summary=aetna_summary,
         market_summary=market_summary,
-        forecast_summary=forecast_summary
+        forecast_summary=forecast_summary,
     )
 
     html = build_html_report(
@@ -1228,7 +1239,7 @@ def generate_metrics_report(
         top_social=top_social,
         aetna_summary=aetna_summary,
         market_summary=market_summary,
-        forecast_summary=forecast_summary
+        forecast_summary=forecast_summary,
     )
 
     md_path.write_text(markdown, encoding="utf-8")
@@ -1241,6 +1252,5 @@ def generate_metrics_report(
     return {
         "markdown": md_path,
         "html": html_path,
-        "pdf": None
+        "pdf": None,
     }
-
