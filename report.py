@@ -130,7 +130,7 @@ def df_to_html(df):
     current = safe_copy(df)
 
     if current.empty:
-        return "<p class='note'>No data available.</p>"
+        return ""
 
     return current.to_html(
         index=False,
@@ -188,10 +188,7 @@ def image_gallery(patterns, max_images=None):
     paths = find_files(PNG_DIR, patterns, max_items=max_images)
 
     if not paths:
-        return (
-            "<p class='note'>No static chart image was found for this section. "
-            "Run <code>python main.py</code> to regenerate project outputs.</p>"
-        )
+        return ""
 
     html_parts = ["<div class='grid'>"]
 
@@ -218,10 +215,57 @@ def html_file_as_srcdoc(path):
     except UnicodeDecodeError:
         raw_html = path.read_text(encoding="latin-1")
 
-    # Embed the full Plotly HTML directly inside the report instead of linking to it.
-    # This makes the final metrics_report.html behave more like an R Markdown HTML output.
-    return escape(raw_html, quote=True)
+    raw_html = raw_html.replace(
+        '<head><meta charset="utf-8" /></head>',
+        '<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />'
+        '<style>html,body{margin:0;padding:0;background:#f5efea;overflow:auto;width:100%;height:100%;}'
+        'body{font-family:Arial,sans-serif;}'
+        '.js-plotly-plot,.plot-container,.plotly,.plotly-graph-div{width:100% !important;max-width:none !important;}'
+        '</style></head>'
+    )
 
+    replacements = {
+        'height:650px; width:1200px;': 'height:980px; width:100%;',
+        'height:650px; width:1000px;': 'height:980px; width:100%;',
+        'height:700px; width:1200px;': 'height:1050px; width:100%;',
+        'height:700px; width:1000px;': 'height:1050px; width:100%;',
+        'height:800px; width:1200px;': 'height:1100px; width:100%;',
+        'height:800px; width:1000px;': 'height:1100px; width:100%;',
+    }
+
+    for old, new in replacements.items():
+        raw_html = raw_html.replace(old, new)
+
+    resize_script = """
+    <script>
+    window.addEventListener('load', function () {
+        function resizePlots() {
+            var plots = document.querySelectorAll('.js-plotly-plot');
+            plots.forEach(function(plot){
+                try {
+                    plot.style.width = '100%';
+                    plot.style.maxWidth = 'none';
+                    if (window.Plotly) {
+                        Plotly.Plots.resize(plot);
+                    }
+                } catch (e) {}
+            });
+        }
+        resizePlots();
+        setTimeout(resizePlots, 250);
+        setTimeout(resizePlots, 800);
+        setTimeout(resizePlots, 1600);
+        window.addEventListener('resize', resizePlots);
+    });
+    </script>
+    """
+
+    if '</body>' in raw_html:
+        raw_html = raw_html.replace('</body>', resize_script + '</body>')
+    else:
+        raw_html += resize_script
+
+    return escape(raw_html, quote=True)
 
 def interactive_gallery(html_patterns, png_patterns=None, max_items=None):
     html_paths = find_files(HTML_DIR, html_patterns, max_items=max_items)
@@ -232,11 +276,23 @@ def interactive_gallery(html_patterns, png_patterns=None, max_items=None):
         for path in html_paths:
             caption = caption_from_filename(path)
             srcdoc_html = html_file_as_srcdoc(path)
+            lower_name = path.name.lower()
+            extra_classes = ["interactive-card"]
+            label = "Interactive figure embedded in report"
+
+            if "sunburst" in lower_name:
+                extra_classes.extend(["hero-card", "sunburst-card"])
+                label = "Interactive sunburst embedded in report"
+            elif "heatmap" in lower_name:
+                extra_classes.extend(["hero-card", "heatmap-card"])
+                label = "Interactive heatmap embedded in report"
+
+            class_attr = " ".join(extra_classes)
 
             html_parts.append(
                 f"""
-                <section class="interactive-card">
-                    <div class="interactive-label">Interactive figure embedded in report</div>
+                <section class="{class_attr}">
+                    <div class="interactive-label">{escape(label)}</div>
                     <h3>{escape(caption)}</h3>
                     <iframe srcdoc="{srcdoc_html}" loading="lazy"></iframe>
                 </section>
@@ -249,17 +305,13 @@ def interactive_gallery(html_patterns, png_patterns=None, max_items=None):
     if png_patterns:
         return image_gallery(png_patterns, max_images=max_items)
 
-    return (
-        "<p class='note'>No interactive chart was found for this section. "
-        "Run <code>python main.py</code> to regenerate project outputs.</p>"
-    )
-
+    return ""
 
 def markdown_image_gallery(patterns, max_images=None):
     paths = find_files(PNG_DIR, patterns, max_items=max_images)
 
     if not paths:
-        return "_No chart image was found for this section. Run `python main.py` to regenerate project outputs._\n"
+        return ""
 
     lines = []
 
@@ -599,15 +651,18 @@ def build_html_report(
         opportunity_table = forecast_summary.get("opportunity")
 
     # Keep report visualizations focused on one mortality data source: OASIS.
-    # The tables/metrics still use all available sources, but the embedded visuals
-    # stay cleaner and less repetitive for judges.
+    # The tables and metrics still use all available sources, but the embedded visuals
+    # stay cleaner and more premium for judges.
     health_burden_charts = interactive_gallery(
-        html_patterns=["Health Burden Heatmap - *OASIS* - *.html"],
+        html_patterns=["interactive_oasis_top_causes_heatmap.html"],
         png_patterns=["Health Burden Heatmap - *OASIS* - *.png"],
     )
 
     oasis_sunburst_charts = interactive_gallery(
-        html_patterns=["*OASIS*Sunburst - Disease Age.html"],
+        html_patterns=[
+            "interactive_education_race_cause_sunburst.html",
+            "interactive_ses_race_cause_sunburst.html",
+        ],
         png_patterns=None,
     )
 
@@ -615,8 +670,10 @@ def build_html_report(
 
     social_heatmaps = interactive_gallery(
         html_patterns=[
-            "Education Heatmap - *OASIS* - *.html",
-            "SES Heatmap - *OASIS* - *.html",
+            "interactive_oasis_dekalb_education_by_cause_heatmap.html",
+            "interactive_oasis_fulton_education_by_cause_heatmap.html",
+            "interactive_oasis_dekalb_ses_by_cause_heatmap.html",
+            "interactive_oasis_fulton_ses_by_cause_heatmap.html",
         ],
         png_patterns=[
             "Education Heatmap - *OASIS* - *.png",
@@ -637,7 +694,6 @@ def build_html_report(
         "CVS Revenue Forecast Scenarios.png",
         "Aetna Market Opportunity Revenue.png",
     ])
-
     css = """
     <style>
     :root {
@@ -940,6 +996,130 @@ def build_html_report(
             display: none;
         }
     }
+
+    body {
+        background: radial-gradient(circle at top, #4b0f20 0%, #220913 48%, #13060d 100%);
+        color: #f6ece5;
+    }
+
+    header {
+        background: linear-gradient(135deg, rgba(69,11,25,0.98) 0%, rgba(31,10,18,0.96) 65%, rgba(92,33,23,0.93) 100%);
+        border-bottom: 3px solid rgba(223, 173, 104, 0.9);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.28);
+    }
+
+    header .eyebrow,
+    header h1,
+    header h2,
+    header p {
+        color: #f7efe8;
+    }
+
+    main {
+        background: linear-gradient(180deg, rgba(42,17,27,0.94) 0%, rgba(26,11,19,0.97) 100%);
+        border: 1px solid rgba(214,165,92,0.30);
+        border-radius: 22px;
+        box-shadow: 0 25px 70px rgba(0,0,0,0.38);
+        margin-top: 28px;
+        margin-bottom: 36px;
+    }
+
+    h2 {
+        color: #f0b38f;
+        border-bottom-color: rgba(214,165,92,0.35);
+    }
+
+    h3,
+    p,
+    .metric-card span,
+    .definition-card,
+    .reference-list li,
+    footer,
+    .bridge,
+    .note {
+        color: #f4e8e0;
+    }
+
+    .callout,
+    .metric-card,
+    .definition-card,
+    .figure-card,
+    .interactive-card {
+        background: linear-gradient(180deg, rgba(76,28,40,0.96) 0%, rgba(50,20,29,0.98) 100%);
+        border-color: rgba(240,179,143,0.35);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+    }
+
+    .gold-callout {
+        background: linear-gradient(180deg, rgba(90,53,23,0.96) 0%, rgba(63,34,17,0.98) 100%);
+    }
+
+    .risk-callout {
+        background: linear-gradient(180deg, rgba(54,31,38,0.96) 0%, rgba(40,22,28,0.98) 100%);
+    }
+
+    .definition-card strong,
+    .interactive-label {
+        color: #ffe6ba;
+    }
+
+    .interactive-label {
+        background: rgba(214,165,92,0.18);
+    }
+
+    .bridge {
+        background: rgba(214,165,92,0.12);
+        border-color: rgba(214,165,92,0.45);
+        border-left-color: #dfad68;
+    }
+
+    .data-table,
+    .data-table td,
+    .data-table th {
+        background: rgba(248,240,232,0.98);
+        color: #38131a;
+    }
+
+    .data-table th {
+        background: #9e3f35;
+        color: #fff;
+    }
+
+    .interactive-grid {
+        gap: 34px;
+    }
+
+    .interactive-card {
+        padding: 18px;
+    }
+
+    .interactive-card.hero-card iframe {
+        background: #f5efea;
+    }
+
+    .interactive-card.heatmap-card iframe {
+        height: 1250px;
+    }
+
+    .interactive-card.sunburst-card iframe {
+        height: 1050px;
+    }
+
+    .interactive-card iframe {
+        height: 1020px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .note {
+        display: none;
+    }
+
+    footer {
+        border-top-color: rgba(214,165,92,0.35);
+    }
     </style>
     """
 
@@ -1029,11 +1209,9 @@ food access, medication adherence, screening, transportation, and consistent pri
 
 {health_burden_charts}
 
-<h3>OASIS Disease and Age Sunburst</h3>
+<h3>OASIS Sunburst Views</h3>
 <p>
-The sunburst view adds depth by showing how leading causes of death split across age groups. The center of the chart
-starts with the disease category, and the outer ring shows the age groups connected to that cause. This helps show not
-only what is driving mortality, but which age groups carry the burden.
+The sunburst views add depth by showing how disease burden cascades through connected categories. Together they help show how leading causes of death relate to education, socioeconomic vulnerability, race, and age patterns in a single visual hierarchy.
 </p>
 
 {oasis_sunburst_charts}
